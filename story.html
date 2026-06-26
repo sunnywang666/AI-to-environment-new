@@ -144,7 +144,13 @@
 </style>
 
 <section class="ctrans" data-n="4" data-k="④ 不只是水" data-t="顺着水往外看"><canvas></canvas></section>
-<section class="scene" id="s4"><canvas></canvas>
+<section id="s4w"><div id="s4-track"><div id="s4-stage">
+  <canvas id="s4-canvas"></canvas>
+  <canvas id="s4-2d"></canvas>
+  <div id="s4-hud"><div class="hud-num">
+    <div class="v" id="s4-v" style="color:var(--ember)">+0%</div>
+    <div class="u" id="s4-u">给芯片供电的燃气轮机与柴油机，正把废气排进空气</div>
+  </div></div>
   <div class="box cbox"><p>AI 留下的不只是水。先说空气：给芯片供电和备电的常是燃气轮机和柴油机，燃烧时排二氧化氮和颗粒物。</p></div>
   <div class="box cbox"><p>xAI 孟菲斯数据中心一度架起 35 台燃气轮机；投运后紧邻厂区二氧化氮峰值上升约<span class="hl hl-e">79%</span>。亚马逊为 Anthropic 建的数据中心，一张许可证就列着<span class="hl hl-e">234 台</span>柴油发电机。</p></div>
   <div class="box cbox"><p>按当前趋势，到 2030 年美国数据中心空气污染每年将造成近<span class="hl hl-e">200 亿美元</span>公共健康损失、约 1300 人提前死亡。</p></div>
@@ -152,7 +158,13 @@
   <div class="box cbox"><p>用电增长抬高碳排：数据中心相关二氧化碳从 2024 年约 1.8 亿吨，预计到 2030 年增至约<span class="hl hl-l">4 亿吨</span>。</p></div>
   <div class="box cbox"><p>为供电，一些原定退役的燃煤电厂被要求继续待命：2025 年美国能源部下令保留<span class="hl hl-g">5 座</span>、合计 3240 兆瓦；宾州一座仅以约 0.5% 负荷运转，待命费用却由当地居民电费分摊。</p></div>
   <div class="box cbox"><p>再往上游，制造芯片同样耗水：2021 年台湾大旱，当局让约<span class="hl hl-w">7.4 万公顷</span>农田停灌、把水优先供给工厂，台积电一度靠水罐车运水维持生产。</p></div>
-</section>
+</div></div></section>
+<style>
+  #s4-track{height:680vh;position:relative}
+  #s4-stage{position:sticky;top:0;height:100vh;overflow:hidden;background:#1a2632}
+  #s4-canvas,#s4-2d{position:absolute;inset:0}
+  #s4-hud{position:absolute;inset:0;pointer-events:none;transition:opacity .35s}
+</style>
 
 <section class="ctrans" data-n="5" data-k="⑤ 账单" data-t="代价落到人，关键是多付了多少"><canvas></canvas></section>
 <section class="scene" id="s5"><canvas></canvas>
