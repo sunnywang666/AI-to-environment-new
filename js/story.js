@@ -478,39 +478,90 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   addEventListener('resize',()=>{cam.aspect=W()/H();cam.updateProjectionMatrix();rdr.setSize(W(),H());});
 })();
 
-/* ---------- ⑥ 算不清：3D 水球体积对比（0.32 vs 519，差一千倍做成物理体积） ---------- */
-(function volumeScene(){
-  const stage=document.getElementById('s6-stage'); if(!stage||!window.THREE) return;
-  const W=()=>innerWidth,H=()=>innerHeight;
-  const sc=new THREE.Scene(); sc.fog=new THREE.FogExp2(0x1a2632,0.012);
-  const cam=new THREE.PerspectiveCamera(50,W()/H(),0.1,400);
-  const rdr=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('s6-canvas')});
-  rdr.setPixelRatio(Math.min(devicePixelRatio,2));rdr.setSize(W(),H());rdr.setClearColor(0x1a2632,1);
-  sc.add(new THREE.AmbientLight(0x44555f,0.9));
-  const key=new THREE.DirectionalLight(0xffffff,1.2);key.position.set(6,9,8);sc.add(key);
-  const key2=new THREE.DirectionalLight(0x5fb6cf,0.5);key2.position.set(-7,3,-4);sc.add(key2);
-  // 真实水材质：透射折射 + 清漆湿亮 + 体积色衰减
-  function water(){return new THREE.MeshPhysicalMaterial({color:0x9fdcec,roughness:0.06,metalness:0,transmission:0.92,thickness:3,ior:1.33,attenuationColor:new THREE.Color(0x2f7d92),attenuationDistance:5,clearcoat:1,clearcoatRoughness:0.05,transparent:true,opacity:0.97});}
-  const rs=0.5, rb=rs*Math.pow(519/0.32,1/3);   // 体积差一千倍 → 半径差约 11.7 倍
-  const small=new THREE.Mesh(new THREE.SphereGeometry(rs,40,40),water());small.position.set(rb*1.2,-rb+rs,0);sc.add(small);
-  const big=new THREE.Mesh(new THREE.SphereGeometry(rb,72,72),water());big.position.set(0,0,0);sc.add(big);
-  const baseS=small.geometry.attributes.position.array.slice(),baseB=big.geometry.attributes.position.array.slice();
-  const grid=new THREE.GridHelper(80,30,0x2a3a40,0x1a2730);grid.position.y=-rb-0.3;sc.add(grid);
-  let P=0;ScrollTrigger.create({trigger:"#s6-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
-  const cbs=[...stage.querySelectorAll('.cbox')];
-  function ripple(mesh,base,amp,t){const a=mesh.geometry.attributes.position.array;
-    for(let i=0;i<a.length;i+=3){const x=base[i],y=base[i+1],z=base[i+2];const d=1+amp*Math.sin(x*2.6+t)*Math.sin(y*2.6+t*1.1)*Math.sin(z*2.6+t*0.9);a[i]=x*d;a[i+1]=y*d;a[i+2]=z*d;}
-    mesh.geometry.attributes.position.needsUpdate=true;mesh.geometry.computeVertexNormals();}
-  let T=0;function animate(){requestAnimationFrame(animate);T+=0.02;
-    ripple(small,baseS,0.05,T);ripple(big,baseB,0.012,T*0.7);
-    small.rotation.y+=0.004;big.rotation.y+=0.002;
-    // 揭示式相机：先近看小滴（几乎看不见），再拉远露出巨球对比（不是数字爬升）
-    const camP=sm(cl((P-0.4)/0.4)),dist=lerp(5,rb*2.9,camP),hgt=lerp(0.3,rb*0.5,camP);
-    cam.position.set(Math.sin(0.32)*dist,hgt,Math.cos(0.32)*dist);
-    cam.lookAt(lerp(small.position.x,0,camP),lerp(small.position.y,-1,camP),0);
-    slideBoxes(cbs,P);rdr.render(sc,cam);}
-  animate();
-  addEventListener('resize',()=>{cam.aspect=W()/H();cam.updateProjectionMatrix();rdr.setSize(W(),H());});
+/* ---------- ⑥ 算不清：对数量级数轴——同一件事，不同口径，落点相差千倍且彼此对不上 ---------- */
+(function s6Scene(){
+  const sec=document.getElementById('s6'); if(!sec) return;
+  const cv=sec.querySelector('canvas'),ctx=cv.getContext('2d');
+  const boxes=[...sec.querySelectorAll('.box')];
+  let P=0,W=0,H=0,DPR=Math.min(devicePixelRatio||1,2);
+  function rz(){W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+  rz();addEventListener('resize',rz);
+  ScrollTrigger.create({trigger:sec,start:"top top",end:"+="+(boxes.length*3400),pin:true,scrub:true,onUpdate:s=>P=s.progress});
+  const L10=Math.log10||(x=>Math.log(x)/Math.LN10);
+  function dot(x,y,r,col,glow){ctx.shadowColor=col;ctx.shadowBlur=glow;ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.shadowBlur=0;}
+  function frame(){requestAnimationFrame(frame);
+    ctx.clearRect(0,0,W,H);
+    const aAxis=sm(cl(P/0.06));
+    const a032=sm(cl((P-0.03)/0.10));
+    const a519=sm(cl((P-0.28)/0.10));
+    const wFade=1-sm(cl((P-0.50)/0.06));
+    const eA=sm(cl((P-0.54)/0.08))*(1-sm(cl((P-0.74)/0.06)));
+    const qA=sm(cl((P-0.78)/0.08));
+    // ===== 水：对数数轴（0.01→1000ml），两口径落点 =====
+    if(wFade>0.01){
+      const Lx=W*0.13,Rx=W*0.87,ay=H*0.62;
+      const xOf=v=>lerp(Lx,Rx,(L10(v)+2)/5);
+      ctx.save();ctx.globalAlpha=wFade*aAxis;
+      ctx.strokeStyle="rgba(150,170,180,.35)";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(Lx,ay);ctx.lineTo(Rx,ay);ctx.stroke();
+      ctx.fillStyle=C.dim;ctx.font=FNT(13);ctx.textAlign="center";ctx.textBaseline="top";
+      for(const d of [0.01,0.1,1,10,100,1000]){const x=xOf(d);ctx.strokeStyle="rgba(150,170,180,.2)";ctx.beginPath();ctx.moveTo(x,ay-5);ctx.lineTo(x,ay+5);ctx.stroke();ctx.fillText(""+d,x,ay+11);}
+      ctx.textAlign="right";ctx.font=FNT(12);ctx.fillStyle="rgba(150,170,180,.6)";ctx.fillText("一次查询的耗水 · 毫升（对数刻度）",Rx,ay+30);
+      ctx.restore();
+      // 0.32 企业口径
+      if(a032>0.01){const x=xOf(0.32);ctx.save();ctx.globalAlpha=wFade*a032;
+        ctx.strokeStyle="rgba(224,102,74,.45)";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,ay);ctx.lineTo(x,ay-46);ctx.stroke();
+        dot(x,ay,5,C.ember,10);
+        ctx.textAlign="center";ctx.textBaseline="alphabetic";
+        ctx.fillStyle="#fff";ctx.font=FNT(18,700);ctx.fillText("0.32 ml",x,ay-66);
+        ctx.fillStyle=C.ember;ctx.font=FNT(12.5,700);ctx.fillText("企业口径",x,ay-50);
+        ctx.fillStyle=C.dim;ctx.font=FNT(12);ctx.fillText("只算机房直接蒸发",x,ay+46);
+        ctx.restore();}
+      // 519 学术口径
+      if(a519>0.01){const xb=xOf(519),xa=xOf(0.32);ctx.save();ctx.globalAlpha=wFade*a519;
+        ctx.strokeStyle="rgba(95,182,207,.55)";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xb,ay);ctx.lineTo(xb,ay-46);ctx.stroke();
+        dot(xb,ay,7,C.water,16);
+        ctx.textAlign="center";ctx.textBaseline="alphabetic";
+        ctx.fillStyle="#fff";ctx.font=FNT(18,700);ctx.fillText("519 ml",xb,ay-66);
+        ctx.fillStyle=C.water;ctx.font=FNT(12.5,700);ctx.fillText("学术口径",xb,ay-50);
+        ctx.fillStyle=C.dim;ctx.font=FNT(12);ctx.fillText("把发电环节也算进去",xb,ay+46);
+        // 跨量级连接弧 + ×1600
+        const mx=(xa+xb)/2,peak=ay-150;
+        ctx.strokeStyle="rgba(95,182,207,.5)";ctx.lineWidth=2;ctx.setLineDash([5,5]);
+        ctx.beginPath();ctx.moveTo(xa,ay-50);ctx.quadraticCurveTo(mx,peak,xb,ay-50);ctx.stroke();ctx.setLineDash([]);
+        const big=Math.max(46,Math.min(72,W*0.05));
+        ctx.textAlign="center";ctx.textBaseline="alphabetic";
+        ctx.fillStyle=C.water;ctx.font=FNT(big,700);ctx.fillText("× 1600",mx,peak+6);
+        ctx.fillStyle=C.dim;ctx.font=FNT(14);ctx.fillText("同一次查询，两种口径差出一千多倍 — 不是谁撒谎，是没算同一部分",mx,peak+30);
+        ctx.restore();}
+    }
+    // ===== 电：三个对不上的版本（同一年用电量，TWh） =====
+    if(eA>0.01){ctx.save();ctx.globalAlpha=eA;
+      const eL=W*0.24,eR=W*0.76,ey=H*0.60,base=H*0.78;
+      const exOf=v=>lerp(eL,eR,(v-400)/100);
+      ctx.strokeStyle="rgba(150,170,180,.3)";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(eL,base);ctx.lineTo(eR,base);ctx.stroke();
+      ctx.fillStyle=C.dim;ctx.font=FNT(13);ctx.textAlign="center";ctx.textBaseline="top";
+      for(const t of [400,425,450,475,500]){const x=exOf(t);ctx.fillText(""+t,x,base+10);}
+      ctx.textAlign="left";ctx.fillStyle="rgba(150,170,180,.6)";ctx.font=FNT(12);ctx.fillText("全球数据中心年用电 · 太瓦时",eL,base+34);
+      const pts=[{v:415,s:"国际能源署"},{v:448,s:"另一口径"},{v:485,s:"联合国"}];
+      pts.forEach(pp=>{const x=exOf(pp.v);ctx.strokeStyle="rgba(210,162,74,.45)";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,base);ctx.lineTo(x,ey);ctx.stroke();
+        dot(x,ey,6,C.energy,12);
+        ctx.fillStyle="#fff";ctx.font=FNT(20,700);ctx.textAlign="center";ctx.textBaseline="alphabetic";ctx.fillText(""+pp.v,x,ey-14);
+        ctx.fillStyle=C.dim;ctx.font=FNT(12);ctx.textBaseline="top";ctx.fillText(pp.s,x,ey+10);});
+      const bf=Math.max(40,Math.min(60,W*0.04));
+      ctx.textAlign="left";ctx.textBaseline="alphabetic";ctx.fillStyle=C.energy;ctx.font=FNT(bf,700);ctx.fillText("415 – 485",eL,ey-90);
+      ctx.fillStyle=C.dim;ctx.font=FNT(14);ctx.fillText("同一年用电，三个口径对不上；亚马逊的用水总量，至今未公布",eL,ey-64);
+      ctx.restore();}
+    // ===== 三问 =====
+    if(qA>0.01){ctx.save();ctx.globalAlpha=qA;
+      const cx=W*0.5,qf=Math.max(34,Math.min(52,W*0.036));
+      ctx.textAlign="center";ctx.textBaseline="middle";
+      const lines=["谁算的？","算了什么？","还有什么没算？"];
+      lines.forEach((s,i)=>{ctx.fillStyle=C.water;ctx.font=FNT(qf,700);ctx.fillText(s,cx,H*0.42+i*qf*1.5);});
+      ctx.fillStyle=C.dim;ctx.font=FNT(15);ctx.fillText("在企业公开统一的数据之前，AI 对环境的真实影响只能估算",cx,H*0.42+3*qf*1.5+10);
+      ctx.restore();}
+    slideBoxes(boxes,P);
+  }
+  frame();
 })();
 
 /* ---------- ③ 水分两路：3D 冷却塔（七八成蒸发升空 / 两三成废水沉出，比例贴合文案） ---------- */
