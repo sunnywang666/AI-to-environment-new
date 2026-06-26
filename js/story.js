@@ -270,9 +270,17 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   sc.add(new THREE.AmbientLight(0x40505a,0.95));const key=new THREE.DirectionalLight(0xcfe6ec,0.6);key.position.set(5,12,7);sc.add(key);
   // 干裂地面（网格平面）
   const grid=new THREE.GridHelper(40,28,0x2a3a40,0x1a2730);grid.position.y=0;sc.add(grid);
-  // 数据中心建筑（抽水的主体，立在水柱中间）
+  // 数据中心建筑群（抽水的主体）：拔高、强发光、立在水柱阵列后方中央，明显高出柱顶，清晰可读
   const dc=new THREE.Group();sc.add(dc);
-  for(let i=0;i<3;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(2.4,3.4,2.6),new THREE.MeshStandardMaterial({color:0x2a3640,emissive:0x16323b,emissiveIntensity:.5,metalness:.5,roughness:.4}));m.position.set((i-1)*3.4,1.7,-12.5);const e=new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),new THREE.LineBasicMaterial({color:0x5fb6cf,transparent:true,opacity:.45}));m.add(e);dc.add(m);}
+  const dcMat=()=>new THREE.MeshStandardMaterial({color:0x223441,emissive:0x1c4a57,emissiveIntensity:.75,metalness:.5,roughness:.42});
+  [[-3.7,5.0,2.4],[0,6.6,3.0],[3.7,4.4,2.2]].forEach(([x,h,w])=>{
+    const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,2.8),dcMat());m.position.set(x,h/2,-11);dc.add(m);
+    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),new THREE.LineBasicMaterial({color:0x6fc8dc,transparent:true,opacity:.6})));
+    const top=new THREE.Mesh(new THREE.BoxGeometry(w*0.82,0.32,2.2),new THREE.MeshStandardMaterial({color:0x2b3d46,emissive:0x16303a,metalness:.6,roughness:.4}));top.position.set(x,h+0.16,-11);dc.add(top);
+  });
+  // 进水口发光环：水从阵列汇入数据中心的入口
+  const intake=new THREE.Mesh(new THREE.TorusGeometry(2.8,0.09,12,48),new THREE.MeshBasicMaterial({color:0x7fd6ea,transparent:true,opacity:.55}));
+  intake.rotation.x=Math.PI/2;intake.position.set(0,0.18,-9);dc.add(intake);
   // 水柱阵列：半透明水青、发光、随滚动逐列塌缩（被抽干）
   const N=14,sp=1.5,baseH=4,geo=new THREE.BoxGeometry(0.78,1,0.78);
   const cols=[],grp=new THREE.Group();sc.add(grp);const cc=(N-1)/2;
@@ -283,8 +291,8 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     const delay=((x)+(z))/(2*N); // 对角抽干波
     cols.push({m,mat,delay});grp.add(m);
   }
-  // 抽水水流：水从水柱被抽向数据中心（看得出流向）
-  const dcPos=new THREE.Vector3(0,2.6,-12);
+  // 抽水水流：水从水柱被抽向数据中心进水口（看得出流向）
+  const dcPos=new THREE.Vector3(0,1.2,-9.5);
   const NF=220,fg=new THREE.BufferGeometry(),fp=new Float32Array(NF*3),fst=new Float32Array(NF),fsx=new Float32Array(NF),fsz=new Float32Array(NF);
   function seedFlow(i){fst[i]=Math.random();fsx[i]=(Math.random()-.5)*N*sp*0.85;fsz[i]=(Math.random()-.5)*N*sp*0.6+2;}
   for(let i=0;i<NF;i++)seedFlow(i);fg.setAttribute('position',new THREE.BufferAttribute(fp,3));
@@ -419,30 +427,51 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const rdr=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('s7-canvas')});
   rdr.setPixelRatio(Math.min(devicePixelRatio,2));rdr.setSize(W(),H());rdr.setClearColor(0x1a2632,1);
   sc.add(new THREE.AmbientLight(0x4a5a64,1));const key=new THREE.DirectionalLight(0xcfe6ec,0.6);key.position.set(5,10,7);sc.add(key);
-  // 中心数据中心
-  const box=new THREE.Mesh(new THREE.BoxGeometry(2.4,1.6,2.4),new THREE.MeshStandardMaterial({color:0x26343c,emissive:0x16323b,emissiveIntensity:.3,metalness:.4,roughness:.5}));sc.add(box);
-  const edge=new THREE.LineSegments(new THREE.EdgesGeometry(box.geometry),new THREE.LineBasicMaterial({color:0x5fb6cf,transparent:true,opacity:.4}));box.add(edge);
-  // 闭环轨道点（水进→机房→蒸发→碳→绕回），粒子沿环流动
-  const R=6, ring=[]; for(let i=0;i<5;i++){const a=i/5*Math.PI*2-Math.PI/2;ring.push(new THREE.Vector3(Math.cos(a)*R,Math.sin(a)*1.2,Math.sin(a)*R));}
-  const cols=[0x5fb6cf,0xd2a24a,0xdce9ed,0x9aab6a,0xe0664a]; // 水/电/蒸汽/碳/废水
-  const NP=240,pg=new THREE.BufferGeometry(),pp=new Float32Array(NP*3),pt=new Float32Array(NP),pc=new Float32Array(NP*3);
-  function bez(t){const seg=t*5,i=Math.floor(seg)%5,f=seg-Math.floor(seg);const a=ring[i],b=ring[(i+1)%5];
-    return {x:lerp(a.x,b.x,f),y:lerp(a.y,b.y,f)+Math.sin(f*Math.PI)*0.6,z:lerp(a.z,b.z,f),c:cols[i]};}
-  for(let i=0;i<NP;i++){pt[i]=Math.random();}
+  // 中心数据中心：主体 + 屋顶散热单元 + 一根冒废气的烟囱（污染出）
+  const dc=new THREE.Group();sc.add(dc);
+  const box=new THREE.Mesh(new THREE.BoxGeometry(2.6,1.8,2.6),new THREE.MeshStandardMaterial({color:0x26343c,emissive:0x18384a,emissiveIntensity:.45,metalness:.45,roughness:.5}));box.position.y=0.9;dc.add(box);
+  box.add(new THREE.LineSegments(new THREE.EdgesGeometry(box.geometry),new THREE.LineBasicMaterial({color:0x6fc8dc,transparent:true,opacity:.55})));
+  for(let i=0;i<3;i++){const f=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.26,0.14,16),new THREE.MeshStandardMaterial({color:0x32434c,emissive:0x16262e,metalness:.6,roughness:.4}));f.position.set((i-1)*0.72,1.86,0.5);dc.add(f);}
+  const stk=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.2,1.2,14),new THREE.MeshStandardMaterial({color:0x2c3942,emissive:0x281d12,metalness:.5,roughness:.5}));stk.position.set(0.85,2.4,-0.7);dc.add(stk);
+  // 闭环轨道：水进→电力→蒸发→废水→碳·干旱→绕回取水（5 节点的倾斜圆环）
+  const R=6.4;
+  const NODES=[{t:"取水",c:0x5fb6cf},{t:"电力",c:0xd2a24a},{t:"蒸发",c:0xdce9ed},{t:"废水",c:0xe0664a},{t:"碳·干旱",c:0x9aab6a}];
+  const NK=NODES.length;
+  const ringPt=t=>{const a=t*Math.PI*2-Math.PI/2;return new THREE.Vector3(Math.cos(a)*R,Math.sin(a)*0.9,Math.sin(a)*R);};
+  const segCol=t=>new THREE.Color(NODES[Math.floor(t*NK)%NK].c);
+  // 常显轨道点（暗，把"圈"画出来）
+  const NT=200,tg=new THREE.BufferGeometry(),tp=new Float32Array(NT*3),tc=new Float32Array(NT*3);
+  for(let i=0;i<NT;i++){const t=i/NT,v=ringPt(t),c=segCol(t).multiplyScalar(0.5);tp[i*3]=v.x;tp[i*3+1]=v.y;tp[i*3+2]=v.z;tc[i*3]=c.r;tc[i*3+1]=c.g;tc[i*3+2]=c.b;}
+  tg.setAttribute('position',new THREE.BufferAttribute(tp,3));tg.setAttribute('color',new THREE.BufferAttribute(tc,3));
+  const track=new THREE.Points(tg,new THREE.PointsMaterial({size:.16,vertexColors:true,transparent:true,opacity:.0,depthWrite:false}));sc.add(track);
+  // 流动亮点（沿环跑，表方向与"循环不息"）
+  const NP=90,pg=new THREE.BufferGeometry(),pp=new Float32Array(NP*3),ptt=new Float32Array(NP),pc=new Float32Array(NP*3);
+  for(let i=0;i<NP;i++)ptt[i]=i/NP;
   pg.setAttribute('position',new THREE.BufferAttribute(pp,3));pg.setAttribute('color',new THREE.BufferAttribute(pc,3));
-  const flow=new THREE.Points(pg,new THREE.PointsMaterial({size:.34,vertexColors:true,transparent:true,opacity:.9,depthWrite:false}));sc.add(flow);
+  const flow=new THREE.Points(pg,new THREE.PointsMaterial({size:.42,vertexColors:true,transparent:true,opacity:.95,depthWrite:false}));sc.add(flow);
+  // 节点发光球 + 文字标签
+  const nodeMarks=[];
+  NODES.forEach((nd,i)=>{const v=ringPt(i/NK);
+    const s=new THREE.Mesh(new THREE.SphereGeometry(0.22,18,18),new THREE.MeshBasicMaterial({color:nd.c}));s.position.copy(v);sc.add(s);nodeMarks.push(s);
+    const cc=document.createElement('canvas');cc.width=256;cc.height=72;const xx=cc.getContext('2d');
+    xx.fillStyle="#"+nd.c.toString(16).padStart(6,'0');xx.font="600 34px 'Noto Sans SC',sans-serif";xx.textAlign="center";xx.textBaseline="middle";xx.fillText(nd.t,128,38);
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cc),transparent:true,depthWrite:false,depthTest:false}));
+    sp.position.set(v.x*1.2,v.y+0.9,v.z*1.2);sp.scale.set(3.4,0.96,1);sp.userData.base=sp.material.opacity;sc.add(sp);nodeMarks.push(sp);});
   let P=0;ScrollTrigger.create({trigger:"#s7-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const cntV=document.getElementById('s7-cnt');
   const cbs=[...stage.querySelectorAll('.cbox')];
   function animate(){requestAnimationFrame(animate);
     sc.rotation.y=0.42;sc.rotation.x=0.12;   // 固定 3/4 视角，别一直转（看清这个圈）
-    cam.position.set(0,4,16);cam.lookAt(0,0,0);
-    const reveal=cl(P*1.2);
-    for(let i=0;i<NP;i++){pt[i]+=0.0016;if(pt[i]>1)pt[i]=0;
-      const show=pt[i]<reveal?1:0;const b=bez(pt[i]);
-      pp[i*3]=b.x;pp[i*3+1]=b.y;pp[i*3+2]=b.z;
-      const c=new THREE.Color(b.c);pc[i*3]=c.r*show;pc[i*3+1]=c.g*show;pc[i*3+2]=c.b*show;}
+    cam.position.set(0,4.5,16.5);cam.lookAt(0,0.6,0);
+    const reveal=cl(P*1.25);                 // 圈随滚动逐段画出
+    track.material.opacity=sm(cl(P/0.3))*0.7;
+    track.geometry.setDrawRange(0,Math.round(NT*reveal));
+    for(let i=0;i<NP;i++){ptt[i]+=0.0022;if(ptt[i]>1)ptt[i]-=1;
+      const show=ptt[i]<reveal?1:0;const v=ringPt(ptt[i]),c=segCol(ptt[i]);
+      pp[i*3]=v.x;pp[i*3+1]=v.y;pp[i*3+2]=v.z;pc[i*3]=c.r*show;pc[i*3+1]=c.g*show;pc[i*3+2]=c.b*show;}
     pg.attributes.position.needsUpdate=true;pg.attributes.color.needsUpdate=true;
+    nodeMarks.forEach((m,i)=>{const ni=Math.floor(i/2);const on=reveal>(ni/NK)?1:0;
+      if(m.isSprite)m.material.opacity=on*sm(cl(P/0.3));else m.material.opacity=on;m.material.transparent=true;});
     cntV.textContent=Math.round(sm(cl((P-0.5)/0.4))*25);
     slideBoxes(cbs,P);rdr.render(sc,cam);}
   animate();
