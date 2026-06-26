@@ -11,6 +11,8 @@ function slideBoxes(boxes,P){const Hh=innerHeight,N=boxes.length;
   boxes.forEach((el,i)=>{if(!el)return;const seg=1/N,u=cl((P-i*seg)/seg);
     const tin=sm(cl(u/0.18)),tout=(i===N-1)?0:sm(cl((u-0.82)/0.18));
     el.style.transform=`translateX(-50%) translateY(${(1-tin)*Hh*0.98+tout*(-Hh*1.15)}px)`;});}
+// 视口守卫：元素离视口太远就不渲染——同一时刻只画在看的那一章，避免十几个 rAF 同时烧 GPU 拖垮滚动
+function vis(el,m){if(!el)return true;const r=el.getBoundingClientRect();return r.bottom>-(m||0)&&r.top<innerHeight+(m||0);}
 
 /* ---------- 通用引擎 ---------- */
 function scene(secId, draws){
@@ -215,6 +217,7 @@ function trend(pts,ydom,color,big,sub){return (ctx,p,prog,alpha,dy)=>layer(ctx,a
   ScrollTrigger.create({trigger:sec,start:"top top",end:"+="+(boxes.length*3400),pin:true,scrub:true,onUpdate:s=>P=s.progress});
   const drawPrice=price(),drawDots=dots(166,90,C.energy,"每格 1 吉瓦 · 亮起的是数据中心新增用电，约占新增的一半");
   function frame(){requestAnimationFrame(frame);
+    if(!vis(sec,300))return;
     ctx.clearRect(0,0,W,H);
     const g=Math.max(54,Math.min(96,W*0.07)),p={l:g+34,r:W-g,t:H*0.40,b:H*0.86,W,H};
     const curveP=sm(cl(P/0.46));           // 曲线只画一次（前两段），画完保持，不随每块重放
@@ -237,6 +240,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   function frame(){requestAnimationFrame(frame);
     // 不 pin：随过渡卡自身滚过视口算进度（滑入→扫亮→滑出），避免与相邻 pin 冲突
     const rect=sec.getBoundingClientRect(), secH=sec.offsetHeight||H;
+    if(rect.bottom<-50||rect.top>H+50)return;   // 视口外不渲染
     const P=cl((H-rect.top)/(H+secH));
     ctx.fillStyle="#1a2632";ctx.fillRect(0,0,W,H);
     const ein=sm(cl(P/0.42)),eout=sm(cl((P-0.58)/0.42)),A=ein*(1-eout),sweep=sm(cl((P-0.2)/0.5));
@@ -301,7 +305,9 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const drainedV=document.getElementById('s1-drained');
   // 黑块滑入
   const cbs=[...stage.querySelectorAll('.cbox')];
+  const vroot=document.getElementById('s1-track');
   function animate(){requestAnimationFrame(animate);
+    if(!vis(vroot,300))return;
     grp.rotation.y=Math.sin(P*0.5)*0.04;
     const camP=sm(cl((P-0.6)/0.4)),r=lerp(15,26,camP),hgt=lerp(8,17,camP);
     cam.position.set(Math.sin(0.3)*r,hgt,Math.cos(0.3)*r);cam.lookAt(0,2,0);
@@ -381,7 +387,9 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
 
   let P=0,N=7;ScrollTrigger.create({trigger:"#s4-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const cbs=[...stage.querySelectorAll('.cbox')];
+  const vroot=document.getElementById('s4-track');
   function animate(){requestAnimationFrame(animate);
+    if(!vis(vroot,300))return;
     grp.rotation.y=Math.sin(P*0.6)*0.06;
     // 揭示式相机：先近看烟囱口，再拉远露出整座厂区+柴油阵列+烟羽
     const camP=sm(cl(P/0.55)),r=lerp(11,21,camP),hgt=lerp(4.5,9,camP);
@@ -460,7 +468,9 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   let P=0;ScrollTrigger.create({trigger:"#s7-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const cntV=document.getElementById('s7-cnt');
   const cbs=[...stage.querySelectorAll('.cbox')];
+  const vroot=document.getElementById('s7-track');
   function animate(){requestAnimationFrame(animate);
+    if(!vis(vroot,300))return;
     sc.rotation.y=0.42;sc.rotation.x=0.12;   // 固定 3/4 视角，别一直转（看清这个圈）
     cam.position.set(0,4.5,16.5);cam.lookAt(0,0.6,0);
     const reveal=cl(P*1.25);                 // 圈随滚动逐段画出
@@ -490,6 +500,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const L10=Math.log10||(x=>Math.log(x)/Math.LN10);
   function dot(x,y,r,col,glow){ctx.shadowColor=col;ctx.shadowBlur=glow;ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.shadowBlur=0;}
   function frame(){requestAnimationFrame(frame);
+    if(!vis(sec,300))return;
     ctx.clearRect(0,0,W,H);
     const aAxis=sm(cl(P/0.06));
     const a032=sm(cl((P-0.03)/0.10));
@@ -606,7 +617,9 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const waste=new THREE.Points(wg,new THREE.PointsMaterial({color:0xc0432a,size:.16,transparent:true,opacity:0,depthWrite:false}));sc.add(waste);
   let P=0;ScrollTrigger.create({trigger:"#s3-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const cbs=[...stage.querySelectorAll('.cbox')];
+  const vroot=document.getElementById('s3-track');
   function animate(){requestAnimationFrame(animate);
+    if(!vis(vroot,300))return;
     tower.rotation.y+=0.0014;towerEdge.rotation.y=tower.rotation.y;rings.rotation.y=tower.rotation.y;
     cam.position.set(Math.sin(0.4)*13,4.6,Math.cos(0.4)*13);cam.lookAt(0,2.0,0);
     const inOn=sm(cl((P-0.02)/0.16))*(1-sm(cl((P-0.46)/0.2)));   // 先：水注入
@@ -644,7 +657,9 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   let P=0;ScrollTrigger.create({trigger:"#chip-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const tempV=document.getElementById('chip-temp'),waterV=document.getElementById('chip-water');
   const cbs=[...document.querySelectorAll('#chip-stage .cbox')];
+  const vroot=document.getElementById('chip-track');
   let T=0;function animate(){requestAnimationFrame(animate);T++;
+    if(!vis(vroot,300))return;
     grp.rotation.y=Math.sin(P*0.6)*0.05;
     const camP=sm(cl((P-0.74)/0.26)),r=lerp(13,30,camP),hgt=lerp(7.5,22,camP),ang=lerp(0,0.5,camP);
     cam.position.set(Math.sin(ang)*r,hgt,Math.cos(ang)*r);cam.lookAt(0,0,0);
