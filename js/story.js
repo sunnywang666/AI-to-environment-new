@@ -263,64 +263,91 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   frame();
 });
 
-/* ---------- ① 取水：3D 水柱阵列被抽干（与芯片同款 3D 语言） ---------- */
+/* ---------- ① 取水：左侧水源被抽干 + 右侧数据中心蓄水上升（守恒：一边减、一边增，和恒定 290）；
+   抽水速率有快慢节奏（非线性），粒子流量随速率脉动（滚得快抽得多，停下只剩细流） ---------- */
 (function intakeScene(){
   const stage=document.getElementById('s1-stage'); if(!stage||!window.THREE) return;
   const W=()=>innerWidth,H=()=>innerHeight;
-  const sc=new THREE.Scene(); sc.fog=new THREE.FogExp2(0x1a2632,0.020);
-  const cam=new THREE.PerspectiveCamera(52,W()/H(),0.1,400);
+  const sc=new THREE.Scene(); sc.fog=new THREE.FogExp2(0x1a2632,0.014);
+  const cam=new THREE.PerspectiveCamera(50,W()/H(),0.1,400);
   const rdr=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('s1-canvas')});
   rdr.setPixelRatio(Math.min(devicePixelRatio,2));rdr.setSize(W(),H());rdr.setClearColor(0x1a2632,1);
-  sc.add(new THREE.AmbientLight(0x40505a,0.95));const key=new THREE.DirectionalLight(0xcfe6ec,0.6);key.position.set(5,12,7);sc.add(key);
-  // 干裂地面（网格平面）
-  const grid=new THREE.GridHelper(40,28,0x2a3a40,0x1a2730);grid.position.y=0;sc.add(grid);
-  // 数据中心建筑群（抽水的主体）：拔高、强发光、立在水柱阵列后方中央，明显高出柱顶，清晰可读
-  const dc=new THREE.Group();sc.add(dc);
-  const dcMat=()=>new THREE.MeshStandardMaterial({color:0x223441,emissive:0x1c4a57,emissiveIntensity:.75,metalness:.5,roughness:.42});
-  [[-3.7,5.0,2.4],[0,6.6,3.0],[3.7,4.4,2.2]].forEach(([x,h,w])=>{
-    const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,2.8),dcMat());m.position.set(x,h/2,-11);dc.add(m);
-    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),new THREE.LineBasicMaterial({color:0x6fc8dc,transparent:true,opacity:.6})));
-    const top=new THREE.Mesh(new THREE.BoxGeometry(w*0.82,0.32,2.2),new THREE.MeshStandardMaterial({color:0x2b3d46,emissive:0x16303a,metalness:.6,roughness:.4}));top.position.set(x,h+0.16,-11);dc.add(top);
-  });
-  // 进水口发光环：水从阵列汇入数据中心的入口
-  const intake=new THREE.Mesh(new THREE.TorusGeometry(2.8,0.09,12,48),new THREE.MeshBasicMaterial({color:0x7fd6ea,transparent:true,opacity:.55}));
-  intake.rotation.x=Math.PI/2;intake.position.set(0,0.18,-9);dc.add(intake);
-  // 水柱阵列：半透明水青、发光、随滚动逐列塌缩（被抽干）
-  const N=14,sp=1.5,baseH=4,geo=new THREE.BoxGeometry(0.78,1,0.78);
-  const cols=[],grp=new THREE.Group();sc.add(grp);const cc=(N-1)/2;
+  sc.add(new THREE.AmbientLight(0x44555f,0.95));
+  const key=new THREE.DirectionalLight(0xcfe6ec,0.7);key.position.set(7,14,9);sc.add(key);
+  const key2=new THREE.DirectionalLight(0x5fb6cf,0.35);key2.position.set(-8,4,-3);sc.add(key2);
+  const grid=new THREE.GridHelper(64,36,0x2a3a40,0x18222a);sc.add(grid);
+
+  // ===== 左侧：水源水柱阵列（剩余水量）=====
+  const N=11,sp=1.3,baseH=4,geo=new THREE.BoxGeometry(0.74,1,0.74);
+  const field=new THREE.Group();field.position.set(-6,0,0);sc.add(field);const cc=(N-1)/2;
+  const cols=[];
   for(let x=0;x<N;x++)for(let z=0;z<N;z++){
     const mat=new THREE.MeshStandardMaterial({color:0x2f7d92,emissive:0x2f7d92,emissiveIntensity:.5,transparent:true,opacity:.62,metalness:.2,roughness:.35});
     const m=new THREE.Mesh(geo,mat);m.position.set((x-cc)*sp,baseH/2,(z-cc)*sp);m.scale.y=baseH;
-    const ed=new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({color:0x6fc8dc,transparent:true,opacity:.5}));m.add(ed);
-    const delay=((x)+(z))/(2*N); // 对角抽干波
-    cols.push({m,mat,delay});grp.add(m);
+    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({color:0x6fc8dc,transparent:true,opacity:.4})));
+    cols.push({m,mat,delay:(x+z)/(2*(N-1))});field.add(m);
   }
-  // 抽水水流：水从水柱被抽向数据中心进水口（看得出流向）
-  const dcPos=new THREE.Vector3(0,1.2,-9.5);
-  const NF=220,fg=new THREE.BufferGeometry(),fp=new Float32Array(NF*3),fst=new Float32Array(NF),fsx=new Float32Array(NF),fsz=new Float32Array(NF);
-  function seedFlow(i){fst[i]=Math.random();fsx[i]=(Math.random()-.5)*N*sp*0.85;fsz[i]=(Math.random()-.5)*N*sp*0.6+2;}
+
+  // ===== 右侧：数据中心（精细工厂）+ 蓄水塔 =====
+  const dc=new THREE.Group();dc.position.set(7,0,-1);sc.add(dc);
+  const hall=new THREE.Mesh(new THREE.BoxGeometry(5.4,3,4.4),new THREE.MeshStandardMaterial({color:0x223038,emissive:0x16323b,emissiveIntensity:.28,metalness:.55,roughness:.45}));hall.position.y=1.5;dc.add(hall);
+  hall.add(new THREE.LineSegments(new THREE.EdgesGeometry(hall.geometry),new THREE.LineBasicMaterial({color:0x6fc8dc,transparent:true,opacity:.5})));
+  // 正面机柜发光窗格（一眼是机房）
+  for(let r=0;r<3;r++)for(let c=0;c<6;c++){const win=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.06),new THREE.MeshStandardMaterial({color:0x0e2630,emissive:0x3fa6c2,emissiveIntensity:.7}));win.position.set(-2.1+c*0.78,0.8+r*0.8,2.23);dc.add(win);}
+  // 屋顶散热单元 + 风扇 + 冷却管
+  for(let i=0;i<4;i++){const u=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.4,1.4),new THREE.MeshStandardMaterial({color:0x2b3d46,emissive:0x14262e,metalness:.6,roughness:.4}));u.position.set(-1.8+i*1.2,3.2,0);dc.add(u);
+    const fan=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.26,0.1,16),new THREE.MeshStandardMaterial({color:0x3a4a52,emissive:0x16262e,metalness:.7,roughness:.3}));fan.position.set(-1.8+i*1.2,3.42,0);dc.add(fan);}
+  const pipe=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,2.8,12),new THREE.MeshStandardMaterial({color:0x2c3942,emissive:0x101a20,metalness:.5,roughness:.5}));pipe.position.set(2.5,2,-1.2);dc.add(pipe);
+  // 蓄水塔（玻璃柱，水位随抽水上升）
+  const TANK_H=4.4,TANK_R=1.5;
+  const tank=new THREE.Group();tank.position.set(-3.6,0,2.6);dc.add(tank);   // world ≈ (3.4,0,1.6)
+  const shell=new THREE.Mesh(new THREE.CylinderGeometry(TANK_R,TANK_R,TANK_H,32,1,true),new THREE.MeshStandardMaterial({color:0x9fdcec,transparent:true,opacity:.13,metalness:.1,roughness:.2,side:THREE.DoubleSide}));shell.position.y=TANK_H/2;tank.add(shell);
+  [0.05,TANK_H].forEach(yy=>{const ring=new THREE.Mesh(new THREE.TorusGeometry(TANK_R,0.05,10,40),new THREE.MeshBasicMaterial({color:0x7fd6ea,transparent:true,opacity:.5}));ring.rotation.x=Math.PI/2;ring.position.y=yy;tank.add(ring);});
+  const wmat=new THREE.MeshStandardMaterial({color:0x3fb0cc,emissive:0x2f7d92,emissiveIntensity:.55,transparent:true,opacity:.88,metalness:.2,roughness:.3});
+  const wcyl=new THREE.Mesh(new THREE.CylinderGeometry(TANK_R*0.93,TANK_R*0.93,1,28),wmat);tank.add(wcyl);   // 高度用 scale.y 控制
+  const intakePos=new THREE.Vector3(7-3.6,TANK_H,-1+2.6);   // 塔顶进水口 world ≈ (3.4,4.4,1.6)
+
+  // ===== 抽水粒子流：水源 → 蓄水塔顶；流量/速度随速率脉动 =====
+  const NF=300,fg=new THREE.BufferGeometry(),fp=new Float32Array(NF*3),ft=new Float32Array(NF),fsx=new Float32Array(NF),fsz=new Float32Array(NF);
+  function seedFlow(i){ft[i]=Math.random();fsx[i]=-6+(Math.random()-.5)*N*sp*0.9;fsz[i]=(Math.random()-.5)*N*sp*0.9;}
   for(let i=0;i<NF;i++)seedFlow(i);fg.setAttribute('position',new THREE.BufferAttribute(fp,3));
-  const flow=new THREE.Points(fg,new THREE.PointsMaterial({color:0x9fe0ee,size:.17,transparent:true,opacity:0,depthWrite:false}));sc.add(flow);
+  const flow=new THREE.Points(fg,new THREE.PointsMaterial({color:0x9fe0ee,size:.18,transparent:true,opacity:0,depthWrite:false}));sc.add(flow);
+
   let P=0;ScrollTrigger.create({trigger:"#s1-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
-  const drainedV=document.getElementById('s1-drained');
-  // 黑块滑入
+  const bigV=document.getElementById('s1-drained'),subV=document.querySelector('#s1-hud .u');
   const cbs=[...stage.querySelectorAll('.cbox')];
   const vroot=document.getElementById('s1-track');
+  const TOTAL=290;
+  const wavy=p=>{p=cl(p);return cl(p-0.07*Math.sin(p*Math.PI*3));};   // 单调递增但斜率起伏→抽水有快慢
+  let prevDr=0,flowStr=0;
   function animate(){requestAnimationFrame(animate);
     if(!vis(vroot,300))return;
-    grp.rotation.y=Math.sin(P*0.5)*0.04;
-    const camP=sm(cl((P-0.6)/0.4)),r=lerp(15,26,camP),hgt=lerp(8,17,camP);
-    cam.position.set(Math.sin(0.3)*r,hgt,Math.cos(0.3)*r);cam.lookAt(0,2,0);
-    let sum=0;
-    for(const c of cols){const dp=sm(cl((P-0.16-c.delay*0.5)/0.42)); // 抽干进度
-      const h=lerp(baseH,0.06,dp);c.m.scale.y=h;c.m.position.y=h/2;
-      c.mat.opacity=lerp(.62,.12,dp);c.mat.emissiveIntensity=lerp(.5,.08,dp);
-      sum+=dp;}
-    drainedV.textContent=Math.round(sum/cols.length*290);
-    const flowOn=sm(cl((P-0.1)/0.4));flow.material.opacity=flowOn*0.85;
-    for(let i=0;i<NF;i++){fst[i]+=0.012;if(fst[i]>1)seedFlow(i);const t=fst[i];
-      fp[i*3]=lerp(fsx[i],dcPos.x,t);fp[i*3+1]=lerp(3,dcPos.y,t)+Math.sin(t*Math.PI)*1.6;fp[i*3+2]=lerp(fsz[i],dcPos.z,t);}
+    // 抽干波（front 速度非匀速→看得出快慢）
+    const front=wavy(P)*1.4;
+    let rem=0;
+    for(const c of cols){const cp=sm(cl((front-c.delay)/0.28));
+      const h=lerp(baseH,0.05,cp);c.m.scale.y=h;c.m.position.y=h/2;
+      c.mat.opacity=lerp(.62,.12,cp);c.mat.emissiveIntensity=lerp(.5,.08,cp);
+      rem+=(h-0.05)/(baseH-0.05);}
+    const fill=1-rem/cols.length, drained=TOTAL*fill;
+    // 守恒：蓄水塔水位 = 已抽走比例（源减多少，这边增多少）
+    const wh=Math.max(0.001,TANK_H*fill);wcyl.scale.y=wh;wcyl.position.y=wh/2;
+    // 速率 → 流强度（滚动越快抽越多；停下仍有微弱细流）
+    const dD=Math.max(0,drained-prevDr);prevDr=drained;
+    flowStr=flowStr*0.86+Math.min(1,dD*0.6+0.15)*0.14;
+    flow.material.opacity=cl(flowStr*1.5)*0.9;flow.material.size=0.12+flowStr*0.18;
+    const adv=0.006+flowStr*0.055;
+    for(let i=0;i<NF;i++){ft[i]+=adv;if(ft[i]>1)seedFlow(i);const t=ft[i];
+      fp[i*3]=lerp(fsx[i],intakePos.x,t);
+      fp[i*3+1]=lerp(3,intakePos.y,t)+Math.sin(t*Math.PI)*2.3;
+      fp[i*3+2]=lerp(fsz[i],intakePos.z,t);}
     fg.attributes.position.needsUpdate=true;
+    // 相机：略微揭示，左右都在画面
+    const camP=sm(cl(P/0.7)),r=lerp(25,29,camP),hgt=lerp(10,14,camP);
+    cam.position.set(Math.sin(0.32)*r,hgt,Math.cos(0.32)*r);cam.lookAt(-1.2,2.2,0.6);
+    field.rotation.y=Math.sin(P*0.5)*0.02;
+    bigV.textContent=Math.round(drained);
+    if(subV)subV.textContent="亿升已被抽进数据中心 · 水源仅剩 "+Math.round(TOTAL-drained)+" 亿升（一边减、一边增，和恒定 290）";
     slideBoxes(cbs,P);rdr.render(sc,cam);}
   animate();
   addEventListener('resize',()=>{cam.aspect=W()/H();cam.updateProjectionMatrix();rdr.setSize(W(),H());});
