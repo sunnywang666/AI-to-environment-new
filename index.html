@@ -4,179 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>你问 AI 的那句话，要喝掉一口水</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/main.css">
+<meta http-equiv="refresh" content="0; url=story.html">
+<link rel="canonical" href="story.html">
+<style>
+  html,body{margin:0;height:100%;background:#1a2632;color:#e7eef0;
+    font-family:"Noto Sans SC",system-ui,sans-serif}
+  .wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+  a{color:#5fb6cf}
+</style>
 </head>
 <body>
-
-<!-- ============ 场景0 · 开场对话框 ============ -->
-<section class="scrolly hero-scrolly" id="hero">
-  <div class="scrolly__inner scrolly__inner--full">
-    <div class="scrolly__graphic" id="g-hero">
-      <div class="hero__inner">
-        <p class="hero__eyebrow">数据新闻 · AI 的环境代价</p>
-        <h1 class="hero__title">你问 AI 的那句话，<br>要喝掉一口水</h1>
-        <form class="chatbox" id="chatForm" autocomplete="off">
-          <textarea class="chatbox__input" id="chatInput" rows="1" maxlength="120"
-                    placeholder="问点什么…比如「帮我写一封一百字的邮件」"></textarea>
-          <div class="chatbox__bar">
-            <span class="chatbox__plus" aria-hidden="true">+</span>
-            <span class="chatbox__flex"></span>
-            <span class="chatbox__model">能耗估算 · 实时</span>
-            <button class="chatbox__send" id="chatSend" type="submit" aria-label="发送">↑</button>
-          </div>
-        </form>
-        <div class="hero__chips" id="chatChips">
-          <button type="button" data-q="帮我写一封一百字的邮件">写封邮件</button>
-          <button type="button" data-q="生成一张风景图片">生成图片</button>
-          <button type="button" data-q="做一段五秒短视频">做段视频</button>
-          <button type="button" data-q="帮我查一个资料">查个资料</button>
-        </div>
-        <div class="hero__answer" id="chatAnswer" hidden>
-          <span class="answer__avatar" aria-hidden="true"></span>
-          <p class="answer__text" id="answerText"></p>
-        </div>
-      </div>
-    </div>
-    <div class="scrolly__steps scrolly__steps--overlay">
-      <div class="step step--spacer"></div>
-      <div class="step"><div class="step__box"><p>你刚才问了 AI 一个问题。屏幕上只有一个转圈的小圆点，几秒钟后答案就出来了，干净、安静，好像什么都没发生。</p></div></div>
-      <div class="step"><div class="step__box"><p>但在你看不见的地方，一座数据中心刚刚为这句话升了温，一小股水被抽出来给它降温。</p></div></div>
-      <div class="step"><div class="step__box"><p>这一次提问大约花掉 <b class="t-energy">0.3 瓦时</b>电，相当于微波炉转一秒；让它写一封一百字的邮件，从机房冷却到电厂发电，整条链路要用掉约 <b class="t-water">519 毫升</b>水，正好一瓶矿泉水。</p></div></div>
-      <div class="step"><div class="step__box"><p>ChatGPT 一天要回答约 <b>25 亿次</b>提问。所以我们想弄清楚：这些水从哪里来，又到哪里去了。↓</p></div></div>
-    </div>
+  <div class="wrap">
+    <p>正在进入《你问 AI 的那句话，要喝掉一口水》…</p>
+    <p>若未自动跳转，请点击 <a href="story.html">这里</a>。</p>
   </div>
-</section>
-
-<!-- ============ 场景1 · 这瓶水从哪来 ============ -->
-<section class="scrolly" id="s1" data-chapter="1">
-  <div class="scrolly__inner">
-    <div class="scrolly__steps">
-      <div class="step" data-chart="waterstress"><div class="step__box"><p class="kicker">① 取水</p><h2 class="section-title">这瓶水从哪来</h2><p>数据中心喝的不是脏水，恰恰相反，常常是干净的自来水，甚至是能直接饮用的水。</p></div></div>
-      <div class="step" data-chart="regional"><div class="step__box"><p>某科技公司 2023 年光给机房降温就取走 <b class="t-water">290 亿升</b>水，其中近八成是饮用水——冷却塔必须用干净淡水，否则管道结垢、滋生细菌。</p></div></div>
-      <div class="step" data-chart="waterstress"><div class="step__box"><p>这些机房常建在本就缺水的地方：2022 年以来美国约 <b class="t-water">三分之二</b>新建或规划的数据中心落在缺水地区；</p></div></div>
-      <div class="step" data-chart="waterstress"><div class="step__box"><p>中国宁夏中卫建起六座超大型数据中心、装了约 <b>65 万台</b>服务器，而当地年降水量只有约 <b class="t-water">200 毫米</b>，不到全国平均的三分之一。</p><p class="source">来源：UC Riverside CACM (2025)、Fortune (2026)、宁夏枢纽资料。</p></div></div>
-    </div>
-    <div class="scrolly__graphic">
-      <div class="panel" data-chart="waterstress"></div>
-      <div class="panel" data-chart="regional"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 场景2 · 水进机房，替烧电的芯片扛热 ============ -->
-<section class="scrolly" id="s2" data-chapter="2">
-  <div class="scrolly__inner">
-    <div class="scrolly__steps">
-      <div class="step" data-chart="ranking"><div class="step__box"><p class="kicker">② 进机房 · 扛热</p><h2 class="section-title">水进机房，替烧电的芯片扛热</h2><p>这股水被泵进机房，是去给芯片降温的，而这些芯片正在大量烧电。</p></div></div>
-      <div class="step" data-chart="ranking"><div class="step__box"><p>2025 年全球数据中心用掉约 <b class="t-energy">448 太瓦时</b>电，比世界上除前十名之外的所有国家都多，接近法国一年的用电量。</p></div></div>
-      <div class="step" data-chart="growth"><div class="step__box"><p>它涨得很快：2025 年全球总用电只增长约 <b>3%</b>，数据中心用电涨了 <b class="t-energy">17%</b>，其中 AI 专用部分增长 <b class="t-energy">50%</b>。</p></div></div>
-      <div class="step" data-chart="growth"><div class="step__box"><p>水在这里干的活，就是把这么多电变成的热，从芯片身上带走。</p><p class="source">来源：UNU-INWEH (2025)、IEA (2025)、Ember/OWID (2026)。</p></div></div>
-    </div>
-    <div class="scrolly__graphic">
-      <div class="panel" data-chart="ranking"></div>
-      <div class="panel" data-chart="growth"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 场景3 · 用完之后，水分两条路 ============ -->
-<section class="scrolly" id="s3" data-chapter="3">
-  <div class="scrolly__inner">
-    <div class="scrolly__steps">
-      <div class="step" data-chart="split"><div class="step__box"><p class="kicker">③ 用完之后</p><h2 class="section-title">水分成两条路</h2><p>给芯片扛完热，这股水分成两条路。</p></div></div>
-      <div class="step" data-chart="split"><div class="step__box"><p>一条是蒸发：冷却塔里约 <b class="t-water">七到八成</b>的水变成水蒸气升上天空。这部分水离开了本地，但它没有真的消失——水蒸气最终会在某处重新落成雨；只是海洋蒸发的水只有约一成会飘到陆地上空降下，所以这些水多半不会回到它被抽走的那条河。</p></div></div>
-      <div class="step" data-chart="split"><div class="step__box"><p>另一条路才是真正回不去的：剩下约 <b class="t-ember">两到三成</b>的水在反复循环中浓缩了盐和矿物，还被加进杀菌剂和缓蚀剂，作为废水排出，含高浓度盐、含氯和溴的杀菌剂、含磷的缓蚀剂，有的还带重金属和 PFAS。</p></div></div>
-      <div class="step" data-chart="split"><div class="step__box"><p>华盛顿州昆西市就吃过亏：当地微软数据中心排出的高盐废水让市政回收厂水质长期超标、回灌池表面结出硬壳，这座小城不得不单独建一座工业污水处理厂，专门处理数据中心冷却水。</p><p class="source">来源：UC Riverside CACM (2025)、EPA Water Reuse Case Study、USGS。</p></div></div>
-    </div>
-    <div class="scrolly__graphic"><div class="panel" data-chart="split"></div></div>
-  </div>
-</section>
-
-<!-- ============ 场景4 · 顺着水往外看，不只是水 ============ -->
-<section class="scrolly" id="s4" data-chapter="4">
-  <div class="scrolly__inner">
-    <div class="scrolly__steps">
-      <div class="step" data-chart="diesel"><div class="step__box"><p class="kicker">④ 不只是水</p><h2 class="section-title">顺着水往外看</h2><p>AI 留下的不只是水的问题。先说空气：给芯片供电和备电的常是天然气轮机和柴油发电机，燃烧时排二氧化氮和颗粒物。</p></div></div>
-      <div class="step" data-chart="diesel"><div class="step__box"><p>xAI 田纳西孟菲斯数据中心现场一度架起 35 台燃气轮机；田纳西大学据卫星测算，投运后紧邻厂区二氧化氮峰值浓度上升约 <b class="t-ember">79%</b>。亚马逊为 Anthropic 在印第安纳建的数据中心，一张环保许可证列着 <b class="t-ember">234 台</b>柴油发电机。按当前趋势，到 2030 年美国数据中心空气污染每年将造成接近 <b class="t-ember">200 亿美元</b>公共健康损失、约 1300 人提前死亡。</p></div></div>
-      <div class="step" data-chart="carbonbar"><div class="step__box"><p>再说碳：数据中心烧的电大部分来自燃煤和燃气电厂，燃烧时排二氧化碳——这是 AI 与碳的关联。同样发一度电，以水电为主的挪威排约 <b class="t-leaf">25 克</b>，以燃煤为主的波兰排约 <b class="t-leaf">716 克</b>。</p></div></div>
-      <div class="step" data-chart="carbontrend"><div class="step__box"><p>AI 让这部分电增长越来越快：2017–2024 年全球数据中心用电以每年约 12% 上升，2025 年同比涨 17%、AI 专用部分涨 50%。用电增长抬高碳排放：数据中心相关二氧化碳排放从 2024 年约 1.8 亿吨预计到 2030 年增至约 <b class="t-leaf">4 亿吨</b>。</p></div></div>
-      <div class="step" data-chart="fossil"><div class="step__box"><p>为满足数据中心新增用电，一些原定退役的燃煤电厂被要求继续待命。2025 年美国能源部下令保留 <b class="t-energy">5 座</b>原定关停的燃煤电厂、合计 3240 兆瓦；其中宾夕法尼亚州一座电厂在被保留期间仅以约 <b class="t-energy">0.5%</b> 的负荷运转，几乎不发电，维持它待命的费用却由当地居民电费分摊。</p></div></div>
-      <div class="step" data-chart="taiwan"><div class="step__box"><p>再往上游，制造芯片同样耗水。2021 年台湾大旱，当局让约 <b class="t-water">7.4 万公顷</b>农田停灌、把水优先供给工厂；当年半导体仅占台湾用水量约一成，却被列为优先保障，台积电一度靠水罐车运水维持生产。</p><p class="source">来源：SELC/田纳西大学 (2025)、《The Unpaid Toll》(2024)、Ember/OWID、Reuters (2021)。</p></div></div>
-    </div>
-    <div class="scrolly__graphic">
-      <div class="panel" data-chart="diesel"></div>
-      <div class="panel" data-chart="carbonbar"></div>
-      <div class="panel" data-chart="carbontrend"></div>
-      <div class="panel" data-chart="fossil"></div>
-      <div class="panel" data-chart="taiwan"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 场景5 · 账单落到人，关键是多付了多少 ============ -->
-<section class="scrolly" id="s5" data-chapter="5">
-  <div class="scrolly__inner">
-    <div class="scrolly__steps">
-      <div class="step" data-chart="bills"><div class="step__box"><p class="kicker">⑤ 账单</p><h2 class="section-title">代价落到人，关键是多付了多少</h2><p>每个人都交电费，问题在于账单涨了多少、为什么涨。过去十年西弗吉尼亚州居民电价上涨 <b class="t-ember">73%</b>。</p></div></div>
-      <div class="step" data-chart="bills"><div class="step__box"><p>住在那里的 Rebecca Michalski 今年 2 月电费 <b class="t-ember">940.08 美元</b>，超过她当月全部收入；同州 Jennifer Brown 冬季每月水电费近 1000 美元，高过她 798 美元的房贷。</p></div></div>
-      <div class="step" data-chart="priceline"><div class="step__box"><p>电价上涨有多个原因：西弗吉尼亚约 87% 的电来自老旧燃煤机组，天然气价格、极端天气、电网维护都在推高成本。<b>数据中心不是唯一原因。</b></p></div></div>
-      <div class="step" data-chart="loadshare"><div class="step__box"><p>但它正成为新增用电需求里最大的一块——电网咨询机构 Grid Strategies 测算，未来五年美国电力负荷将增加约 <b>166 吉瓦</b>，其中约 <b class="t-energy">90 吉瓦</b>来自数据中心。</p></div></div>
-      <div class="step" data-chart="loadshare"><div class="step__box"><p>为满足这部分需求新建的电厂和电网，最终通过电费摊到每个用户头上：2025 年美国各电力公司提出的涨价申请合计约 <b class="t-ember">310 亿美元</b>，是前一年的两倍。</p><p class="source">来源：PBS/AP (2026)、EIA、Grid Strategies (2025)。</p></div></div>
-    </div>
-    <div class="scrolly__graphic">
-      <div class="panel" data-chart="bills"></div>
-      <div class="panel" data-chart="priceline"></div>
-      <div class="panel" data-chart="loadshare"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 场景6 · 用了多少，没有公认数字 ============ -->
-<section class="scrolly" id="s6" data-chapter="6">
-  <div class="scrolly__inner">
-    <div class="scrolly__steps">
-      <div class="step" data-chart="slider"><div class="step__box"><p class="kicker">⑥ 算不清</p><h2 class="section-title">用了多少，没有公认的数字</h2><p>业界既没有统一的测量方法，也没有公开的数据库。</p></div></div>
-      <div class="step" data-chart="slider"><div class="step__box"><p>同样是一次查询消耗的水，OpenAI 的奥尔特曼按机房里直接蒸发的水计算得出 <b class="t-water">0.32 毫升</b>，谷歌用同样口径得出 0.26 毫升；加州大学河滨分校的团队把发电环节消耗的水也算进去，得出约 <b class="t-water">519 毫升</b>——同一件事，两种算法相差一千多倍。</p></div></div>
-      <div class="step" data-chart="three"><div class="step__box"><p>电也一样：2024 到 2025 年全球数据中心年用电量，国际能源署和联合国分别给出 <b>415、448、485</b> 三个版本。</p></div></div>
-      <div class="step" data-chart="three"><div class="step__box"><p>在企业公开统一的数据之前，AI 对环境的真实影响只能估算。</p><p class="source">来源：Altman / Google / UC Riverside CACM (2025)、IEA / UNU (2024–2025)。</p></div></div>
-    </div>
-    <div class="scrolly__graphic">
-      <div class="panel" data-chart="slider"></div>
-      <div class="panel" data-chart="three"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 场景7 · 结尾 · 系统流向图 + 未来展望 ============ -->
-<section class="scrolly" id="s7" data-chapter="7">
-  <div class="scrolly__inner">
-    <div class="scrolly__steps">
-      <div class="step" data-chart="flow"><div class="step__box"><p class="kicker">⑦ 这套系统</p><h2 class="section-title">水和电进来，污染出去</h2><p>把这一路汇成一张图。左边，蓝色的水从一条水位下降的河流进数据中心——多是饮用水，约三分之二的数据中心建在缺水区。</p></div></div>
-      <div class="step" data-chart="flow"><div class="step__box"><p>右边，琥珀色的电从一座冒烟的电厂流进来——2025 年全球数据中心用掉约 <b class="t-energy">448 太瓦时</b>电。机房里，芯片升温，水裹住它扛热。</p></div></div>
-      <div class="step" data-chart="flow"><div class="step__box"><p>水在芯片处分成两股：约 <b class="t-water">七到八成</b>升空成水汽飘走，约 <b class="t-ember">两到三成</b>变成化学废水排出。电厂那头，持续吐出二氧化碳和二氧化氮。</p></div></div>
-      <div class="step" data-chart="flow"><div class="step__box"><p>二氧化碳不会消失。它累积在大气里推高气温，加剧干旱（IPCC AR6）；而数据中心多建在干旱区。于是这不是一条直线，而是一个圈——排碳让缺水更重，下一座机房要喝的水更紧。<b>这套流动，每天约 25 亿次。</b></p></div></div>
-      <div class="step" data-chart="futurefan"><div class="step__box"><p>国际能源署预计，全球数据中心年用电量将从 2025 年约 448 太瓦时增加到 2030 年约 <b class="t-energy">945 太瓦时</b>，是 2025 年的约 2.1 倍；对应二氧化碳排放预计从 2024 年约 1.8 亿吨升到约 4 亿吨。</p></div></div>
-      <div class="step" data-chart="jevons"><div class="step__box"><p>推高用量的是 AI 产品形态变化：能自行执行任务的智能体、需要逐步推理的模型（处理一个简单问题的耗电达普通模型的 <b>43 倍</b>）、随时待命的语音和视频功能，正被装进越来越多的软件。数据中心的用电量、二氧化碳排放量、取水量都会随之上升。</p><p class="source">来源：IEA《Energy and AI》(2025)、MIT Tech Review (2025)、IM3 情景。</p></div></div>
-    </div>
-    <div class="scrolly__graphic">
-      <div class="panel" data-chart="flow"></div>
-      <div class="panel" data-chart="futurefan"></div>
-      <div class="panel" data-chart="jevons"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 附录 ============ -->
-<section class="reading" id="sources">
-  <p class="kicker">数据来源与方法说明</p>
-  <p class="source">本文数据均来自一手权威来源，标注年份与口径：IEA《Energy and AI》(2025) · UNU-INWEH《Environmental Cost of AI》(2025) · UC Riverside《Making AI Less Thirsty》CACM (2025) · LBNL《2024 US Data Center Energy Usage Report》 · 《The Unpaid Toll》(2024) · PBS/AP (2026) · Ember / Our World in Data (2026) · EIA · SELC / 田纳西大学 (2025) · Grid Strategies (2025) · Reuters (2021) · IPCC AR6。部分数字在不同来源间存在口径差异，这是测量方法、统计边界与时间节点不同所致，并非错误；正文已标注核心差异。</p>
-</section>
-
-<script src="js/vendor/d3.min.js"></script>
-<script src="js/chat.js"></script>
-<script src="js/charts.js"></script>
-<script src="js/scrolly.js"></script>
+  <script>location.replace("story.html");</script>
 </body>
 </html>
