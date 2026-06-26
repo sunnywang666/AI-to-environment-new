@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>你问 AI 的那句话，要喝掉一口水</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a2632; --ink:#0a0f14; --text:#e7eef0; --dim:#8a969c;
+    --water:#5fb6cf; --energy:#d2a24a; --ember:#e0664a; --leaf:#9aab6a;
+    --sans:"Noto Sans SC","Microsoft YaHei",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:18px;line-height:1.85;-webkit-font-smoothing:antialiased}
+  /* ---------- 开场 ---------- */
+  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14vh 24px}
+  .hero .eyebrow{font-size:13px;letter-spacing:.3em;color:var(--dim);font-weight:500;margin-bottom:26px}
+  .hero h1{font-size:clamp(34px,6vw,64px);font-weight:900;color:#fff;line-height:1.25;margin-bottom:40px}
+  .chatbox{width:100%;max-width:600px;background:var(--ink);border:1px solid rgba(180,205,215,.14);border-radius:16px;padding:16px 18px 10px;text-align:left}
+  .chatbox .ph{color:#5f6a70;font-size:18px}
+  .chatbox .bar{display:flex;align-items:center;gap:10px;margin-top:12px}
+  .chatbox .plus{width:30px;height:30px;border-radius:50%;border:1px solid rgba(180,205,215,.14);display:grid;place-items:center;color:var(--dim)}
+  .chatbox .flex{flex:1}
+  .chatbox .model{font-size:13px;color:var(--dim);border:1px solid rgba(180,205,215,.14);border-radius:20px;padding:4px 12px}
+  .chatbox .send{width:34px;height:34px;border-radius:50%;background:var(--water);color:#08141a;display:grid;place-items:center;font-size:1.1rem}
+  .hero .scrollcue{margin-top:9vh;font-size:13px;letter-spacing:.14em;color:var(--dim);animation:bob 2.2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+  /* ---------- scrolly scene（pin 舞台 + 全宽 canvas + teenager 黑块） ---------- */
+  .scene{height:100vh;overflow:hidden;position:relative}
+  .scene canvas{position:absolute;inset:0;width:100%;height:100%}
+  /* teenager 文字块：纯黑实底·单字号·无边框无阴影·左对齐·居中约3/5 */
+  .box{position:absolute;left:50%;top:16vh;transform:translateX(-50%);max-width:600px;width:auto;
+    background:#000;border-radius:2px;padding:11px 14px;z-index:2;will-change:transform}
+  .box p{font-size:18px;font-weight:400;color:#fff;line-height:1.62;margin:0}
+  .box p+p{margin-top:.5em}
+  /* 高光笔：实色背景+白字+不加粗+前后留空；4色语义 */
+  .hl{display:inline-block;padding:0 5px;line-height:1.46;border-radius:1px;font-weight:400;white-space:nowrap;margin:0 .14em;color:#fff;vertical-align:baseline}
+  .hl-w{background:var(--water)} .hl-e{background:var(--ember)} .hl-g{background:var(--energy)} .hl-l{background:var(--leaf)}
+  /* 统一读数：全站用电价曲线那张标杆的同一种大小/位置（单个大数 + 小注） */
+  .hud-num{position:absolute;left:clamp(54px,7vw,96px);top:39vh;z-index:2;pointer-events:none;max-width:34vw}
+  .hud-num .v{font-weight:700;font-size:clamp(50px,5.2vw,78px);line-height:1;font-variant-numeric:tabular-nums}
+  .hud-num .u{font-size:15px;color:var(--dim);margin-top:10px;line-height:1.5}
+  /* 章节过渡：炫酷 pin（大编号被水光扫亮 + 标题滑入 + 上升水粒子 + 扫光线） */
+  .ctrans{height:100vh;position:relative;overflow:hidden;background:#1a2632}
+  .ctrans canvas{position:absolute;inset:0;width:100%;height:100%}
+  /* 结尾 */
+  .closing{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14vh 24px;gap:20px;max-width:760px;margin:0 auto}
+  .closing .cl-lead{font-size:18px;color:var(--dim)}
+  .closing .cl-body{font-size:18px;color:#cdd6da;line-height:1.85;max-width:30em}
+  .closing .cl-ask{font-size:clamp(28px,5vw,52px);font-weight:900;color:#fff;line-height:1.35;margin-top:12px}
+  .endnote{max-width:620px;margin:0 auto;padding:14vh 24px}
+  .endnote .kicker{font-size:13px;letter-spacing:.3em;color:var(--dim);margin-bottom:14px}
+  .endnote .src{font-size:13px;color:var(--dim);line-height:1.7}
+</style></head><body>
+
+<!-- ===== 开场 ===== -->
+<section class="hero">
+  <div class="eyebrow">数据新闻 · AI 的环境代价</div>
+  <h1>你问 AI 的那句话，<br>要喝掉一口水</h1>
+  <div class="chatbox">
+    <div class="ph">问点什么…比如「帮我写一封一百字的邮件」</div>
+    <div class="bar"><span class="plus">+</span><span class="flex"></span><span class="model">能耗估算 · 实时</span><span class="send">↑</span></div>
+  </div>
+  <div class="scrollcue">跟着这一口水往下 ↓</div>
+</section>
+
+<section class="ctrans" data-n="1" data-k="① 取水" data-t="这瓶水从哪来"><canvas></canvas></section>
+<section id="s1w"><div id="s1-track"><div id="s1-stage">
+  <canvas id="s1-canvas"></canvas>
+  <div id="s1-hud"><div class="hud-num">
+    <div class="v" id="s1-drained" style="color:var(--water)">0</div>
+    <div class="u">亿升干净水已被数据中心抽走 · 共约 290 亿升，近八成是饮用水</div>
+  </div></div>
+  <div class="box cbox"><p>数据中心喝的不是脏水，恰恰相反，常常是干净的自来水，甚至是能直接饮用的水。</p></div>
+  <div class="box cbox"><p>某科技公司 2023 年光给机房降温就取走<span class="hl hl-w">290 亿升</span>水，其中近八成是饮用水——冷却塔必须用干净淡水，否则管道结垢、滋生细菌。</p></div>
+  <div class="box cbox"><p>这些机房偏偏建在缺水的地方：2022 年以来，美国约<span class="hl hl-w">三分之二</span>新建或规划的数据中心，落在缺水地区。</p></div>
+  <div class="box cbox"><p>中国宁夏中卫建起六座超大型数据中心、装了约 65 万台服务器，而当地年降水量只有约<span class="hl hl-w">200 毫米</span>，不到全国平均的三分之一。</p></div>
+</div></div></section>
+<style>
+  #s1-track{height:440vh;position:relative}
+  #s1-stage{position:sticky;top:0;height:100vh;overflow:hidden;background:#1a2632}
+  #s1-canvas{position:absolute;inset:0}
+  #s1-hud{position:absolute;inset:0;pointer-events:none}
+  #s1-hud .readout{position:absolute;left:34px;top:30px}
+  #s1-hud .row{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+  #s1-hud .k{font-size:12px;letter-spacing:.14em;color:#7d8a90;width:50px;white-space:nowrap}
+  #s1-hud .v{font-weight:900;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+  #s1-hud .u{font-size:13px;color:#7d8a90}
+</style>
+
+<section class="ctrans" data-n="2" data-k="② 进机房 · 扛热" data-t="水进机房，替烧电的芯片扛热"><canvas></canvas></section>
+<!-- 芯片章：原 viz-chip-heat 的 Three.js 动画（你说这个特别好，整段保留） -->
+<section id="chip"><div id="chip-track"><div id="chip-stage">
+  <canvas id="chip-canvas"></canvas>
+  <div id="chip-hud">
+    <div class="readout">
+      <div class="row"><span class="k">芯片温度</span><span class="v" id="chip-temp">22</span><span class="u">°C</span></div>
+      <div class="row"><span class="k">耗冷却水</span><span class="v" id="chip-water">0</span><span class="u">毫升 / 这一格</span></div>
+    </div>
+  </div>
+  <div class="box cbox"><p>这股水被泵进机房，是去给芯片降温的，而这些芯片正在大量烧电。</p></div>
+  <div class="box cbox"><p>因为你不是一个人在提问。2025 年全球数据中心用掉约<span class="hl hl-g">448 太瓦时</span>电，比世界上除前十名之外的所有国家都多，接近法国一年的用电量。</p></div>
+  <div class="box cbox"><p>你按下发送的那一刻，芯片开始<span class="hl hl-g">烧电运算</span>，热从中心涌出来。</p></div>
+  <div class="box cbox"><p>而且涨得很快：2025 年全球总用电只增约 3%，数据中心用电涨了<span class="hl hl-g">17%</span>，其中 AI 专用部分增长 50%。</p></div>
+  <div class="box cbox"><p>清洁淡水被泵上来给它<span class="hl hl-w">汽化降温</span>——七到八成就这样升上天空。水在这里干的活，就是把这么多电变成的热，从芯片身上带走。</p></div>
+  <div class="box cbox"><p>你看到的只是<span class="hl hl-e">其中一格</span>。全球每天约 25 亿次提问，每一次都在烧电、耗水。</p></div>
+</div></div></section>
+<style>
+  #chip-track{height:460vh;position:relative}
+  #chip-stage{position:sticky;top:0;height:100vh;overflow:hidden;background:#1a2632}
+  #chip-canvas{position:absolute;inset:0}
+  #chip-hud{position:absolute;inset:0;pointer-events:none}
+  #chip-hud .readout{position:absolute;left:34px;top:30px;font-variant-numeric:tabular-nums}
+  #chip-hud .row{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+  #chip-hud .k{font-size:12px;letter-spacing:.14em;color:#7d8a90;width:64px;white-space:nowrap}
+  #chip-hud .v{font-weight:900;font-size:30px;line-height:1}
+  #chip-hud .u{font-size:13px;color:#7d8a90}
+  #chip-temp{color:var(--ember)} #chip-water{color:var(--water)}
+  .cbox{transform:translateX(-50%) translateY(120vh)}   /* 初始在屏外下方，JS 纯位移滑入 */
+</style>
+
+<section class="ctrans" data-n="3" data-k="③ 用完之后" data-t="水分成两条路"><canvas></canvas></section>
+<section id="s3w"><div id="s3-track"><div id="s3-stage">
+  <canvas id="s3-canvas"></canvas>
+  <div id="s3-hud"><div class="hud-num">
+    <div class="v" style="color:var(--water)">70–80%</div>
+    <div class="u">在冷却塔蒸发升空、多在别处降雨；另 20–30% 成化学废水，回不去</div>
+  </div></div>
+  <div class="box cbox"><p>给芯片扛完热，这股水分成两条路。约<span class="hl hl-w">七到八成</span>在冷却塔里变成水蒸气，升上天空。</p></div>
+  <div class="box cbox"><p>这部分水离开了本地，但没有真的消失——只是海洋蒸发的水只有约一成会飘到陆地上空降下，所以这些水多半不会回到被抽走的那条河，对当地是<span class="hl hl-w">净损失</span>。</p></div>
+  <div class="box cbox"><p>剩下约<span class="hl hl-e">两到三成</span>浓缩了盐和矿物，还被加进杀菌剂和缓蚀剂，作为化学废水排出，有的还带重金属和 PFAS——这部分才是真正回不去的。</p></div>
+  <div class="box cbox"><p>华盛顿州昆西市就吃过亏：当地微软数据中心排出的高盐废水让市政回收厂水质长期超标，小城不得不<span class="hl hl-e">单独建一座工业污水处理厂</span>。</p></div>
+</div></div></section>
+<style>
+  #s3-track{height:460vh;position:relative}
+  #s3-stage{position:sticky;top:0;height:100vh;overflow:hidden;background:#1a2632}
+  #s3-canvas{position:absolute;inset:0}
+  #s3-hud{position:absolute;inset:0;pointer-events:none}
+  #s3-hud .readout{position:absolute;left:34px;top:30px}
+  #s3-hud .row{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+  #s3-hud .k{font-size:12px;letter-spacing:.14em;color:#7d8a90;width:56px;white-space:nowrap}
+  #s3-hud .v{font-weight:900;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+  #s3-hud .u{font-size:13px;color:#7d8a90}
+</style>
+
+<section class="ctrans" data-n="4" data-k="④ 不只是水" data-t="顺着水往外看"><canvas></canvas></section>
+<section class="scene" id="s4"><canvas></canvas>
+  <div class="box cbox"><p>AI 留下的不只是水。先说空气：给芯片供电和备电的常是燃气轮机和柴油机，燃烧时排二氧化氮和颗粒物。</p></div>
+  <div class="box cbox"><p>xAI 孟菲斯数据中心一度架起 35 台燃气轮机；投运后紧邻厂区二氧化氮峰值上升约<span class="hl hl-e">79%</span>。亚马逊为 Anthropic 建的数据中心，一张许可证就列着<span class="hl hl-e">234 台</span>柴油发电机。</p></div>
+  <div class="box cbox"><p>按当前趋势，到 2030 年美国数据中心空气污染每年将造成近<span class="hl hl-e">200 亿美元</span>公共健康损失、约 1300 人提前死亡。</p></div>
+  <div class="box cbox"><p>再说碳：同样发一度电，以水电为主的挪威约 25 克，以燃煤为主的波兰约<span class="hl hl-l">716 克</span>——相差近 28 倍。</p></div>
+  <div class="box cbox"><p>用电增长抬高碳排：数据中心相关二氧化碳从 2024 年约 1.8 亿吨，预计到 2030 年增至约<span class="hl hl-l">4 亿吨</span>。</p></div>
+  <div class="box cbox"><p>为供电，一些原定退役的燃煤电厂被要求继续待命：2025 年美国能源部下令保留<span class="hl hl-g">5 座</span>、合计 3240 兆瓦；宾州一座仅以约 0.5% 负荷运转，待命费用却由当地居民电费分摊。</p></div>
+  <div class="box cbox"><p>再往上游，制造芯片同样耗水：2021 年台湾大旱，当局让约<span class="hl hl-w">7.4 万公顷</span>农田停灌、把水优先供给工厂，台积电一度靠水罐车运水维持生产。</p></div>
+</section>
+
+<section class="ctrans" data-n="5" data-k="⑤ 账单" data-t="代价落到人，关键是多付了多少"><canvas></canvas></section>
+<section class="scene" id="s5"><canvas></canvas>
+  <div class="box cbox"><p>每个人都交电费，问题在于账单涨了多少、为什么涨。过去十年，西弗吉尼亚州居民电价上涨<span class="hl hl-e">73%</span>。</p></div>
+  <div class="box cbox"><p>住在那里的 Rebecca Michalski 今年 2 月电费<span class="hl hl-e">940.08 美元</span>，超过她当月全部收入；同州 Jennifer Brown 冬季每月水电费近 1000 美元，高过她 798 美元的房贷。</p></div>
+  <div class="box cbox"><p>电价上涨有多个原因：西弗吉尼亚约 87% 的电来自老旧燃煤机组，天然气价格、极端天气、电网维护都在推高成本。<span class="hl hl-w">数据中心不是唯一原因。</span></p></div>
+  <div class="box cbox"><p>但它正成为新增用电需求里最大的一块——未来五年美国电力负荷将增加约 166 吉瓦，其中约<span class="hl hl-g">90 吉瓦</span>来自数据中心。</p></div>
+  <div class="box cbox"><p>为满足这部分需求新建的电厂和电网，最终通过电费摊到每个用户头上：2025 年美国各电力公司提出的涨价申请合计约<span class="hl hl-e">310 亿美元</span>，是前一年的两倍。</p></div>
+</section>
+
+<section class="ctrans" data-n="6" data-k="⑥ 算不清" data-t="用了多少，没有公认的数字"><canvas></canvas></section>
+<section id="s6w"><div id="s6-track"><div id="s6-stage">
+  <canvas id="s6-canvas"></canvas>
+  <div id="s6-hud"><div class="hud-num">
+    <div class="v" style="color:var(--water)">519</div>
+    <div class="u">毫升 · 学术口径（算上发电）· 是企业说的 0.32ml（右下角那一点）的约 1600 倍</div>
+  </div></div>
+  <div class="box cbox"><p>业界既没有统一的测量方法，也没有公开的数据库。同样一次查询的耗水，OpenAI 按机房直接蒸发只算得<span class="hl hl-w">0.32 毫升</span>——小到几乎看不见。</p></div>
+  <div class="box cbox"><p>但加州大学河滨分校把发电环节的耗水也算进去，得出约<span class="hl hl-w">519 毫升</span>——同一件事，<span class="hl hl-e">相差一千多倍</span>。不是有人撒谎，而是算的不是同一部分。</p></div>
+  <div class="box cbox"><p>电也一样：2024 到 2025 年全球数据中心年用电量，国际能源署和联合国分别给出 <span class="hl hl-g">415、448、485</span> 三个对不上的版本。运营全球最大云服务的亚马逊，至今从未公布用水总量。</p></div>
+  <div class="box cbox"><p>看到任何 AI 环境数字，都该多问三句：<span class="hl hl-w">谁算的？算了什么？还有什么没算？</span>在企业公开统一的数据之前，AI 对环境的真实影响只能估算。</p></div>
+</div></div></section>
+<style>
+  #s6-track{height:440vh;position:relative}
+  #s6-stage{position:sticky;top:0;height:100vh;overflow:hidden;background:#1a2632}
+  #s6-canvas{position:absolute;inset:0}
+  #s6-hud{position:absolute;inset:0;pointer-events:none}
+  #s6-hud .readout{position:absolute;left:34px;top:30px}
+  #s6-hud .row{display:flex;align-items:baseline;gap:10px}
+  #s6-hud .k{font-size:12px;letter-spacing:.14em;color:#7d8a90;white-space:nowrap}
+  #s6-hud .v{font-weight:900;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+  #s6-hud .u{font-size:13px;color:#7d8a90}
+</style>
+
+<section class="ctrans" data-n="7" data-k="⑦ 这套系统" data-t="水和电进来，污染出去"><canvas></canvas></section>
+<section id="s7w"><div id="s7-track"><div id="s7-stage">
+  <canvas id="s7-canvas"></canvas>
+  <div id="s7-hud"><div class="hud-num">
+    <div class="v" id="s7-cnt" style="color:var(--water)">0</div>
+    <div class="u">亿次 / 每天 · 这套水电进、污染出的流动</div>
+  </div></div>
+  <div class="box cbox"><p>把这一路汇成一张图。左边，蓝色的水从一条水位下降的河流进数据中心——多是饮用水，约三分之二的数据中心建在缺水区。</p></div>
+  <div class="box cbox"><p>右边，琥珀色的电从一座冒烟的电厂流进来——2025 年全球数据中心用掉约<span class="hl hl-g">448 太瓦时</span>电。机房里，芯片升温，水裹住它扛热。</p></div>
+  <div class="box cbox"><p>水在芯片处分成两股：约<span class="hl hl-w">七到八成</span>升空成水汽，约<span class="hl hl-e">两到三成</span>变成化学废水。电厂那头，持续吐出二氧化碳和二氧化氮。</p></div>
+  <div class="box cbox"><p>二氧化碳不会消失，它累积在大气里加剧干旱；而数据中心多建在干旱区。于是这不是一条直线，而是<span class="hl hl-e">一个圈</span>——排碳让缺水更重，下一座机房要喝的水更紧。这套流动，每天约 25 亿次。</p></div>
+  <div class="box cbox"><p>国际能源署预计，全球数据中心用电将从 2025 年约 448 太瓦时增到 2030 年约<span class="hl hl-g">945 太瓦时</span>，是 2025 年的约 2.1 倍；对应碳排从 1.8 亿吨升到约 4 亿吨。这篇报道不否定 AI，但每份便利都对应真实成本，最终都落在具体的人身上。</p></div>
+</div></div></section>
+<style>
+  #s7-track{height:520vh;position:relative}
+  #s7-stage{position:sticky;top:0;height:100vh;overflow:hidden;background:#1a2632}
+  #s7-canvas{position:absolute;inset:0}
+  #s7-hud{position:absolute;inset:0;pointer-events:none}
+  #s7-hud .readout{position:absolute;left:34px;top:30px}
+  #s7-hud .row{display:flex;align-items:baseline;gap:10px}
+  #s7-hud .k{font-size:12px;letter-spacing:.14em;color:#7d8a90;white-space:nowrap}
+  #s7-hud .v{font-weight:900;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+  #s7-hud .u{font-size:13px;color:#7d8a90}
+</style>
+
+<section class="closing">
+  <p class="cl-lead">这篇报道不是否定 AI——它正助力气象预测、药物研发、灾害预警。</p>
+  <p class="cl-body">但每项技术都有物理根基，每份根基都对应真实成本，每笔成本最终都落在具体的人身上。我们拿到了便利。那么——</p>
+  <p class="cl-ask">我们是否亏欠了<br>电线与水管另一端的人？</p>
+</section>
+
+<section class="endnote">
+  <div class="kicker">数据来源与方法说明</div>
+  <p class="src">IEA《Energy and AI》(2025) · UNU-INWEH (2025) · UC Riverside CACM (2025) · LBNL (2024) · 《The Unpaid Toll》(2024) · PBS/AP (2026) · Ember/OWID (2026) · EIA · SELC/田纳西大学 (2025) · Grid Strategies (2025) · Reuters (2021) · IPCC AR6。部分数字在不同来源间存在口径差异，是测量方法与统计边界不同所致，正文已标注核心差异。</p>
+</section>
+
+<script src="js/vendor/gsap.min.js"></script>
+<script src="js/vendor/ScrollTrigger.min.js"></script>
+<script src="js/vendor/three.min.js"></script>
+<script src="js/story.js"></script>
+</body></html>

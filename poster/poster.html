@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>云的身体 · 海报 80×200cm</title>
+<link rel="stylesheet" href="poster.css">
+</head>
+<body>
+
+<!-- ===================== 故障 / 纹理 SVG 滤镜 ===================== -->
+<svg width="0" height="0" class="defs" aria-hidden="true"><defs>
+  <filter id="warp"><feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="2" seed="7" result="t"/>
+    <feDisplacementMap in="SourceGraphic" in2="t" scale="9" xChannelSelector="R" yChannelSelector="G"/></filter>
+  <filter id="rgbsplit" x="-6%" y="-6%" width="112%" height="112%">
+    <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r"/>
+    <feOffset in="r" dx="6" dy="0" result="ro"/>
+    <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" result="gb"/>
+    <feOffset in="gb" dx="-6" dy="0" result="gbo"/>
+    <feBlend in="ro" in2="gbo" mode="screen"/></filter>
+</defs></svg>
+
+<div class="poster" id="poster">
+  <div class="tex" aria-hidden="true"></div>
+  <div class="scan" aria-hidden="true"></div>
+  <div class="spine" aria-hidden="true"></div>
+
+  <!-- ============ BAND 0 · 标题（上下留白） ============ -->
+  <section class="band b-title" data-zone="cloud">
+    <div class="bandnum" aria-hidden="true">00</div>
+    <h1 class="hero glitch" data-text="AI 的隐形账单">AI 的隐形账单</h1>
+    <p class="hero-sub">跟着一滴水，看 AI 的环境代价</p>
+    <div class="hero-fact">
+      <div class="drop" aria-hidden="true"></div>
+      <div class="hero-fact__txt">
+        <p class="lead">你问 AI 一句话，它要喝掉多少水？</p>
+        <p class="big">回答你这一句 ≈ <b class="t-energy">0.34</b> 瓦时电 ＋ <b class="t-water">519</b> 毫升水<span class="dim">（一瓶矿泉水）</span></p>
+        <p class="lead2">而 ChatGPT 一天要回答约 <b class="num glitch-num" data-text="25 亿">25 亿</b> 次。跟着这一口水，往下看它去了哪。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BAND 1 · ① 取水 · 地图 ============ -->
+  <section class="band b-map" data-zone="cold">
+    <div class="bandnum" aria-hidden="true">01</div>
+    <p class="kicker">① 取水</p>
+    <h2 class="title">这口水，从最缺水的地方抽来</h2>
+    <p class="body">给 AI 降温要用清洁淡水，常是自来水甚至饮用水；可数据中心偏偏扎堆在<b class="t-water">最缺水的地带</b>。</p>
+    <div class="viz" id="viz-map"></div>
+    <div class="map-notes">
+      <div class="mnote"><p class="mnote__h t-water">中国 · 宁夏中卫</p><p class="mnote__b">已建 <b>6 座</b>超大型数据中心、约 <b>65 万台</b>服务器；当地年降水仅约 <b>200 毫米</b>，不到全国平均的 1/3。</p></div>
+      <div class="mnote"><p class="mnote__h t-water">美国 · 弗吉尼亚</p><p class="mnote__b">约 <b>2/3</b> 新建数据中心落在缺水区；弗吉尼亚州约 <b>600 座</b>，占全州约 <b>40%</b> 用电。</p></div>
+    </div>
+    <p class="source">来源：UC Riverside《Making AI Less Thirsty》CACM (2025) · Fortune (2026) · 宁夏枢纽资料 · WRI Aqueduct 4.0</p>
+  </section>
+
+  <!-- ============ BAND 2 · ② 进机房 ============ -->
+  <section class="band b-skyline" data-zone="cold">
+    <div class="bandnum" aria-hidden="true">02</div>
+    <p class="kicker">② 进机房 · 扛热</p>
+    <h2 class="title">水，给正在烧电的芯片降温</h2>
+    <p class="body">2025 年全球数据中心用掉约 <b class="t-energy">448 太瓦时</b>电，当成一个国家能排<b class="t-energy">全球第 12</b>——而这条曲线还在加速往上爬。</p>
+    <div class="viz2">
+      <div class="viz" id="viz-skyline"></div>
+      <div class="viz" id="viz-growth"></div>
+    </div>
+    <p class="source note-strong">年增约 <b class="t-energy">12%</b>，是全球总电力增速的 <b>4 倍</b>。　来源：UNU-INWEH (2025) · IEA《Energy and AI》(2025)</p>
+  </section>
+
+  <!-- ============ BAND 3 · ③ 水分两条路 ============ -->
+  <section class="band b-split" data-zone="warm">
+    <div class="bandnum" aria-hidden="true">03</div>
+    <p class="kicker">③ 用完之后</p>
+    <h2 class="title">水，分成两条路</h2>
+    <p class="body">扛完热的水，大半蒸发升空、一部分变成化学废水；而同样问一句话，<b class="t-water">不同地方用水差近 7 倍</b>。</p>
+    <div class="viz2">
+      <div class="viz" id="viz-split"></div>
+      <div class="viz" id="viz-regional"></div>
+    </div>
+    <p class="source">华盛顿州昆西市：微软数据中心高盐废水让市政回收厂水质长期超标。　来源：UC Riverside CACM (2025) · EPA</p>
+  </section>
+
+  <!-- ============ BAND 4 · ④ 电厂在排碳 ============ -->
+  <section class="band b-carbon" data-zone="warm">
+    <div class="bandnum" aria-hidden="true">04</div>
+    <p class="kicker">④ 不只是水 · 电厂在排碳</p>
+    <h2 class="title">这笔碳账，正在肉眼可见地变厚</h2>
+    <div class="viz2">
+      <div class="viz" id="viz-carbontrend"></div>
+      <div class="viz" id="viz-diesel"></div>
+    </div>
+    <p class="source">数据中心的电大多来自燃煤、燃气，烧电就排碳；供电、备电的柴油机还在污染空气。　来源：IEA / UNU-INWEH (2025) · SELC/田纳西大学 (2025) ·《The Unpaid Toll》(2024)</p>
+  </section>
+
+  <!-- ============ BAND 5 · ⑤ 账单 ============ -->
+  <section class="band b-bills" data-zone="warm">
+    <div class="bandnum" aria-hidden="true">05</div>
+    <p class="kicker">⑤ 账单</p>
+    <h2 class="title">代价，落到具体的人身上</h2>
+    <div class="viz" id="viz-bills"></div>
+    <div class="viz2">
+      <div class="viz" id="viz-priceline"></div>
+      <div class="viz" id="viz-loadshare"></div>
+    </div>
+    <p class="source">过去十年西弗吉尼亚居民电价涨了 73%；一座 600MW 数据中心用电相当于 10 万户家庭。　来源：PBS/AP (2026) · EIA · Grid Strategies (2025)</p>
+  </section>
+
+  <!-- ============ BAND 6 · ⑥ 算不清 ============ -->
+  <section class="band b-scale" data-zone="warm">
+    <div class="bandnum" aria-hidden="true">06</div>
+    <p class="kicker">⑥ 算不清</p>
+    <h2 class="title glitch" data-text="同一件事，数字差一千倍">同一件事，数字差一千倍</h2>
+    <div class="viz2">
+      <div class="viz" id="viz-scale"></div>
+      <div class="viz" id="viz-three"></div>
+    </div>
+    <p class="body center">企业只算机房直接蒸发，研究者把发电耗水也算了进去——<b>间接是直接的 12 倍</b>；连"一年用多少电"，三个权威口径都对不上。</p>
+    <p class="threeq"><span class="glitch" data-text="谁算的？">谁算的？</span><span class="glitch" data-text="算了什么？">算了什么？</span><span class="glitch" data-text="还有什么没算？">还有什么没算？</span></p>
+    <p class="source center">来源：Altman / Google / UC Riverside (2025) · LBNL (2024) · IEA / UNU (2025)</p>
+  </section>
+
+  <!-- ============ BAND 7 · ⑦ 未来 ============ -->
+  <section class="band b-jevons" data-zone="ground">
+    <div class="bandnum" aria-hidden="true">07</div>
+    <p class="kicker">⑦ 这套系统</p>
+    <h2 class="title">今天的用量，很可能是往后最低的一年</h2>
+    <p class="body">单次查询越来越省，总量却被使用量暴涨吞没：2025 年约 448 太瓦时，2030 年约 <b class="t-energy">945</b>，2035 年最高或达 <b class="t-energy">1720 太瓦时</b>。</p>
+    <div class="viz2">
+      <div class="viz" id="viz-jevons"></div>
+      <div class="viz" id="viz-futurefan"></div>
+    </div>
+    <p class="ending">这笔账没有写进任何一张 AI 账单——<br>它记在缺水地区的<b class="t-water">水表</b>、老旧电网的<b class="t-energy">电表</b>、电厂排向天空的<b class="t-ember">碳</b>里，<br>而它正随着用量，一年比一年更重。</p>
+  </section>
+
+  <!-- ============ BAND 8 · 署名 + 二维码 ============ -->
+  <section class="band b-foot" data-zone="ground">
+    <div class="foot-grid">
+      <div class="foot-src"><p class="sign"><span class="todo">王曦雯　2024080173</span></p></div>
+      <div class="foot-qr">
+        <div class="viz" id="qr"></div>
+        <p class="qr-cap">扫码 · 看交互网页版</p>
+        <p class="qr-url">sunnywang666.github.io/AI-to-environment</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="../js/vendor/d3.min.js"></script>
+<script src="qr-data.js"></script>
+<script src="us-dc.js"></script>
+<script src="poster-viz.js"></script>
+</body>
+</html>
