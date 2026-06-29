@@ -1,6 +1,7 @@
 # 调试/临时截图
 _*.png
 _*.html
+_verify/
 .DS_Store
 Thumbs.db
 
