@@ -186,6 +186,14 @@
 <section class="ctrans" data-n="7" data-k="⑦ 这套系统" data-t="水和电进来，污染出去"><canvas></canvas></section>
 <section id="s7w"><div id="s7-track"><div id="s7-stage">
   <canvas id="s7-canvas"></canvas>
+  <div id="s7-labels">
+    <div class="s7lab" data-k="water" style="left:15%;top:62%">多是饮用水 · 约 2/3 建在缺水区</div>
+    <div class="s7lab" data-k="power" style="right:9%;top:60%;text-align:right">≈ 448 太瓦时 / 年</div>
+    <div class="s7lab" data-k="evap"  style="left:52%;top:20%">蒸发 70–80% · 升空，多在别处降雨</div>
+    <div class="s7lab" data-k="waste" style="left:54%;top:78%">废水 20–30% · 含盐、杀菌剂、含磷缓蚀剂，排进下水道或河</div>
+    <div class="s7lab" data-k="co2"   style="right:7%;top:14%;text-align:right">≈ 1.89 亿吨 CO₂/年 + NOx</div>
+    <div class="s7lab" data-k="loop"  style="left:6%;top:30%">碳累积 → 气候变暖 → 干旱加重 → 下一座机房取水更紧</div>
+  </div>
   <div id="s7-hud"><div class="hud-num">
     <div class="v" id="s7-cnt" style="color:var(--water)">0</div>
     <div class="u">亿次 / 每天 · 这套水电进、污染出的流动</div>
@@ -193,13 +201,16 @@
   <div class="box cbox"><p>把这一路汇成一张图。左边，蓝色的水从一条水位下降的河流进数据中心——多是饮用水，约三分之二的数据中心建在缺水区。</p></div>
   <div class="box cbox"><p>右边，琥珀色的电从一座冒烟的电厂流进来——2025 年全球数据中心用掉约<span class="hl hl-g">448 太瓦时</span>电。机房里，芯片升温，水裹住它扛热。</p></div>
   <div class="box cbox"><p>水在芯片处分成两股：约<span class="hl hl-w">七到八成</span>升空成水汽，约<span class="hl hl-e">两到三成</span>变成化学废水。电厂那头，持续吐出二氧化碳和二氧化氮。</p></div>
-  <div class="box cbox"><p>二氧化碳不会消失，它累积在大气里加剧干旱；而数据中心多建在干旱区。于是这不是一条直线，而是<span class="hl hl-e">一个圈</span>——排碳让缺水更重，下一座机房要喝的水更紧。这套流动，每天约 25 亿次。</p></div>
+  <div class="box cbox"><p>电厂发电排出的二氧化碳进入大气后长期累积，推高气温、<span class="hl hl-l">加剧干旱</span>（IPCC AR6）。</p></div>
+  <div class="box cbox"><p>而美国约<span class="hl hl-w">三分之二</span>新建数据中心正落在缺水地区——排碳让缺水更重，下一座机房要喝的水更紧。这套流动，每天约 25 亿次。</p></div>
   <div class="box cbox"><p>国际能源署预计，全球数据中心用电将从 2025 年约 448 太瓦时增到 2030 年约<span class="hl hl-g">945 太瓦时</span>，是 2025 年的约 2.1 倍；对应碳排从 1.8 亿吨升到约 4 亿吨。这篇报道不否定 AI，但每份便利都对应真实成本，最终都落在具体的人身上。</p></div>
 </div></div></section>
 <style>
-  #s7-track{height:520vh;position:relative}
+  #s7-track{height:700vh;position:relative}
   #s7-stage{position:sticky;top:0;height:100vh;overflow:hidden;background:#1a2632}
   #s7-canvas{position:absolute;inset:0}
+  #s7-labels{position:absolute;inset:0;pointer-events:none;z-index:2}
+  .s7lab{position:absolute;max-width:26%;font-size:13px;line-height:1.5;color:#cdd6da;opacity:0;transition:opacity .3s;text-shadow:0 2px 12px rgba(0,0,0,.75)}
   #s7-hud{position:absolute;inset:0;pointer-events:none}
   #s7-hud .readout{position:absolute;left:34px;top:30px}
   #s7-hud .row{display:flex;align-items:baseline;gap:10px}
@@ -209,9 +220,9 @@
 </style>
 
 <section class="closing">
-  <p class="cl-lead">这篇报道不是否定 AI——它正助力气象预测、药物研发、灾害预警。</p>
-  <p class="cl-body">但每项技术都有物理根基，每份根基都对应真实成本，每笔成本最终都落在具体的人身上。我们拿到了便利。那么——</p>
-  <p class="cl-ask">我们是否亏欠了<br>电线与水管另一端的人？</p>
+  <p class="cl-lead">这篇报道不否定 AI——它正助力气象预测、药物研发、灾害预警。</p>
+  <p class="cl-body">但每一次便利都有物理根基：真实的水、电与排放，最终落在具体的人身上。国际能源署预计，到 2030 年全球数据中心用电将达约 945 太瓦时，相关二氧化碳排放升至约 4 亿吨。</p>
+  <p class="cl-ask">用电量、碳排放、取水量，<br>都会随之继续上升。</p>
 </section>
 
 <section class="endnote">
