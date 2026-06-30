@@ -176,12 +176,30 @@
 </section>
 
 <section class="ctrans" data-n="6" data-k="⑥ 算不清" data-t="用了多少，没有公认的数字"><canvas></canvas></section>
-<section class="scene" id="s6"><canvas></canvas>
-  <div class="box cbox"><p>业界既没有统一的测量方法，也没有公开的数据库。同样一次查询的耗水，OpenAI 按机房直接蒸发只算得<span class="hl hl-w">0.32 毫升</span>——小到几乎看不见。</p></div>
-  <div class="box cbox"><p>但加州大学河滨分校把发电环节的耗水也算进去，得出约<span class="hl hl-w">519 毫升</span>——同一件事，<span class="hl hl-e">相差一千多倍</span>。不是有人撒谎，而是算的不是同一部分。</p></div>
-  <div class="box cbox"><p>电也一样：2024 到 2025 年全球数据中心年用电量，国际能源署和联合国分别给出 <span class="hl hl-g">415、448、485</span> 三个对不上的版本。运营全球最大云服务的亚马逊，至今从未公布用水总量。</p></div>
-  <div class="box cbox"><p>看到任何 AI 环境数字，都该多问三句：<span class="hl hl-w">谁算的？算了什么？还有什么没算？</span>在企业公开统一的数据之前，AI 对环境的真实影响只能估算。</p></div>
-</section>
+<section id="s6w"><div id="s6-track"><div id="s6-stage">
+  <canvas id="s6-canvas"></canvas>
+  <div id="s6-labels">
+    <div class="s7lab" data-k="ent" style="left:11%;top:72%">企业口径 · 只算机房直接蒸发</div>
+    <div class="s7lab" data-k="aca" style="left:11%;top:20%">学术口径 · 把发电环节也算进去</div>
+    <div class="s7lab" data-k="x16" style="left:30%;top:42%;font-size:15px;color:#fff;max-width:30%">同一件事，两种算法 <b style="color:#5fb6cf">差一千多倍</b></div>
+    <div class="s7lab" data-k="elec" style="right:8%;top:18%;text-align:right;max-width:30%">全球数据中心一年用多少电，连总数都给出三个对不上的版本（太瓦时）</div>
+  </div>
+  <div id="s6-hud"><div class="hud-num">
+    <div class="v" id="s6-val" style="color:var(--water)">0.32</div>
+    <div class="u">毫升 / 一次查询 · 口径不同，差一千多倍</div>
+  </div></div>
+  <div class="box cbox"><p>业界既没有统一的测量方法，也没有公开的数据库。同样一次查询的耗水，OpenAI 按机房直接蒸发算得 <span class="hl hl-w">0.32 毫升</span>，谷歌用同样口径算得 <span class="hl hl-w">0.26 毫升</span>——小到几乎看不见，连同口径、不同公司都不完全一致。</p></div>
+  <div class="box cbox"><p>但加州大学河滨分校把发电环节的耗水也算进去，得出约<span class="hl hl-w">519 毫升</span>——同一件事，两种算法<span class="hl hl-e">相差一千多倍</span>。不是有人撒谎，而是算的不是同一部分。</p></div>
+  <div class="box cbox"><p>电也一样：2024 到 2025 年全球数据中心年用电量，国际能源署和联合国分别给出 <span class="hl hl-g">415、448、485</span> 三个对不上的版本——连一年用多少电，都给不出一个公认的数。</p></div>
+  <div class="box cbox"><p>在企业公开统一的数据之前，AI 对环境的真实影响只能<span class="hl hl-w">估算</span>。看到任何环境数字，都该多问一句：谁算的，算了什么，还有什么没算。</p></div>
+</div></div></section>
+<style>
+  #s6-track{height:480vh;position:relative}
+  #s6-stage{position:sticky;top:0;height:100vh;overflow:hidden;background:#1a2632}
+  #s6-canvas{position:absolute;inset:0}
+  #s6-labels{position:absolute;inset:0;pointer-events:none;z-index:2}
+  #s6-hud{position:absolute;inset:0;pointer-events:none}
+</style>
 
 <section class="ctrans" data-n="7" data-k="⑦ 这套系统" data-t="水和电进来，污染出去"><canvas></canvas></section>
 <section id="s7w"><div id="s7-track"><div id="s7-stage">
