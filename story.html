@@ -236,16 +236,55 @@
   #s7-hud .u{font-size:13px;color:#7d8a90}
 </style>
 
-<section class="closing">
-  <p class="cl-lead">这篇报道不否定 AI——它正助力气象预测、药物研发、灾害预警。</p>
-  <p class="cl-body">但每一次便利都有物理根基：真实的水、电与排放，最终落在具体的人身上。国际能源署预计，到 2030 年全球数据中心用电将达约 945 太瓦时，相关二氧化碳排放升至约 4 亿吨。</p>
-  <p class="cl-ask">用电量、碳排放、取水量，<br>都会随之继续上升。</p>
-</section>
+<section id="closew"><div id="close-track"><div id="close-stage">
+  <canvas id="close-canvas"></canvas>
+  <input id="closeInput" type="text" maxlength="40" placeholder="你问 AI 的那一句…" autocomplete="off">
+  <div class="box cbox"><p>这篇报道不否定 AI——它正助力气象预测、药物研发、灾害预警。</p></div>
+  <div class="box cbox"><p>但你问的每一句，背后都是真实的水、电与排放。每天，约 <span class="hl hl-w">25 亿次</span>。</p></div>
+  <div class="box cbox"><p>国际能源署预计，到 2030 年用电将达约 <span class="hl hl-g">945 太瓦时</span>、相关碳排约 <span class="hl hl-l">4 亿吨</span>——用电、碳排、取水，都还在往上走。</p></div>
+</div></div></section>
+<style>
+  #close-track{height:800vh;position:relative}
+  #close-stage{position:sticky;top:0;height:100vh;overflow:hidden;background:#1a2632}
+  #close-canvas{position:absolute;inset:0;width:100%;height:100%}
+  #closeInput{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);width:min(560px,74vw);height:66px;box-sizing:border-box;padding:0 22px;background:rgba(26,38,50,.4);border:1.5px solid rgba(150,205,225,.55);border-radius:14px;color:#cdd6da;font:16px 'Noto Sans SC',sans-serif;outline:none;opacity:0;transition:opacity .6s;pointer-events:none;caret-color:#5fb6cf;z-index:3}
+  #closeInput::placeholder{color:#5f6a70}
+  #closeInput.on{opacity:1;pointer-events:auto}
+</style>
 
 <section class="endnote">
   <div class="kicker">数据来源与方法说明</div>
   <p class="src">IEA《Energy and AI》(2025) · UNU-INWEH (2025) · UC Riverside CACM (2025) · LBNL (2024) · 《The Unpaid Toll》(2024) · PBS/AP (2026) · Ember/OWID (2026) · EIA · SELC/田纳西大学 (2025) · Grid Strategies (2025) · Reuters (2021) · IPCC AR6。部分数字在不同来源间存在口径差异，是测量方法与统计边界不同所致，正文已标注核心差异。</p>
 </section>
+
+<style>
+/* ===== 移动端适配（仅 ≤640px 生效，不影响桌面） ===== */
+@media (max-width:640px){
+  html,body{font-size:16px}
+  .hero h1{font-size:clamp(25px,7.5vw,38px);margin-bottom:26px}
+  .chatbox{max-width:none}
+  /* 文字框：小字号 + 撑宽保持横向长方形 + 减内距 + 上移让出 3D 场景 */
+  .box{max-width:none;width:90vw;top:9vh;padding:13px 15px;border-radius:12px}
+  .box p{font-size:14.5px;line-height:1.5}
+  /* 左侧大数字：缩小并下移到屏幕下部，避开文字框与 3D 主体 */
+  .hud-num{max-width:58vw;left:16px;top:auto;bottom:13vh}
+  .hud-num .v{font-size:clamp(32px,10vw,46px)}
+  .hud-num .u{font-size:12.5px;margin-top:6px}
+  /* 各段小 HUD 数值缩小 */
+  #s1-hud .v,#chip-hud .v,#s3-hud .v,#s7-hud .v{font-size:21px}
+  #s1-hud .k,#chip-hud .k,#s3-hud .k,#s7-hud .k{width:auto;font-size:11px}
+  /* 流向图标注缩小加宽 */
+  .s7lab{font-size:11px;max-width:46%;line-height:1.4}
+  /* 结尾输入框缩小 */
+  #closeInput{width:88vw;height:52px;font-size:14px;padding:0 16px;top:57%}
+  /* 结尾静态段与来源说明 */
+  .closing{padding:10vh 20px}
+  .closing .cl-lead,.closing .cl-body{font-size:15px}
+  .closing .cl-ask{font-size:clamp(23px,7vw,34px)}
+  .endnote{padding:10vh 18px}
+  .endnote .src{font-size:12px;line-height:1.65}
+}
+</style>
 
 <script src="js/vendor/gsap.min.js"></script>
 <script src="js/vendor/ScrollTrigger.min.js"></script>
