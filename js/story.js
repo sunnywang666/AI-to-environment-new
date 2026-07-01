@@ -271,8 +271,8 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const W=()=>innerWidth,H=()=>innerHeight;
   const sc=new THREE.Scene(); sc.fog=new THREE.FogExp2(0x1a2632,0.014);
   const cam=new THREE.PerspectiveCamera(50,W()/H(),0.1,400);
-  const rdr=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('s1-canvas')});
-  rdr.setPixelRatio(Math.min(devicePixelRatio,2));rdr.setSize(W(),H());rdr.setClearColor(0x1a2632,1);
+  const rdr=new THREE.WebGLRenderer({antialias:innerWidth>640,canvas:document.getElementById('s1-canvas')});
+  rdr.setPixelRatio(Math.min(devicePixelRatio,innerWidth<640?1:2));rdr.setSize(W(),H());rdr.setClearColor(0x1a2632,1);
   sc.add(new THREE.AmbientLight(0x44555f,0.95));
   const key=new THREE.DirectionalLight(0xcfe6ec,0.7);key.position.set(7,14,9);sc.add(key);
   const key2=new THREE.DirectionalLight(0x5fb6cf,0.35);key2.position.set(-8,4,-3);sc.add(key2);
@@ -361,8 +361,8 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const W=()=>innerWidth,H=()=>innerHeight;
   const sc=new THREE.Scene(); sc.fog=new THREE.FogExp2(0x1a2632,0.018);
   const cam=new THREE.PerspectiveCamera(50,W()/H(),0.1,400);
-  const rdr=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('s4-canvas')});
-  rdr.setPixelRatio(Math.min(devicePixelRatio,2));rdr.setSize(W(),H());rdr.setClearColor(0x1a2632,1);
+  const rdr=new THREE.WebGLRenderer({antialias:innerWidth>640,canvas:document.getElementById('s4-canvas')});
+  rdr.setPixelRatio(Math.min(devicePixelRatio,innerWidth<640?1:2));rdr.setSize(W(),H());rdr.setClearColor(0x1a2632,1);
   sc.add(new THREE.AmbientLight(0x46565f,0.95));
   const key=new THREE.DirectionalLight(0xcfe6ec,0.65);key.position.set(7,12,8);sc.add(key);
   const rim=new THREE.DirectionalLight(0xe0a060,0.35);rim.position.set(-6,5,-6);sc.add(rim);
@@ -465,8 +465,8 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const sc=new THREE.Scene(); sc.fog=new THREE.FogExp2(0x1a2632,0.012);
   const cam=new THREE.PerspectiveCamera(50,W()/H(),0.1,500);
   cam.position.set(0,5.0,18.5); cam.lookAt(0,1.6,0);
-  const rdr=new THREE.WebGLRenderer({antialias:true,canvas:cv});
-  rdr.setPixelRatio(Math.min(devicePixelRatio,2)); rdr.setSize(W(),H()); rdr.setClearColor(0x1a2632,1);
+  const rdr=new THREE.WebGLRenderer({antialias:innerWidth>640,canvas:cv});
+  rdr.setPixelRatio(Math.min(devicePixelRatio,innerWidth<640?1:2)); rdr.setSize(W(),H()); rdr.setClearColor(0x1a2632,1);
   sc.add(new THREE.AmbientLight(0x4a5a64,1)); const key=new THREE.DirectionalLight(0xcfe6ec,0.7); key.position.set(5,12,8); sc.add(key);
   const EDGE=(mesh,color,op)=>{const e=new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry),new THREE.LineBasicMaterial({color:color,transparent:true,opacity:op==null?0.9:op})); mesh.add(e); return e;};
   const V=(x,y,z)=>({x:x,y:y,z:z});
@@ -607,8 +607,8 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const sc=new THREE.Scene(); sc.fog=new THREE.FogExp2(0x1a2632,0.01);
   const cam=new THREE.PerspectiveCamera(50,W()/H(),0.1,500);
   cam.position.set(0,4.0,17.5); cam.lookAt(0,3.4,0);
-  const rdr=new THREE.WebGLRenderer({antialias:true,canvas:cv});
-  rdr.setPixelRatio(Math.min(devicePixelRatio,2)); rdr.setSize(W(),H()); rdr.setClearColor(0x1a2632,1);
+  const rdr=new THREE.WebGLRenderer({antialias:innerWidth>640,canvas:cv});
+  rdr.setPixelRatio(Math.min(devicePixelRatio,innerWidth<640?1:2)); rdr.setSize(W(),H()); rdr.setClearColor(0x1a2632,1);
   sc.add(new THREE.AmbientLight(0x4a5a64,1)); const key=new THREE.DirectionalLight(0xcfe6ec,0.7); key.position.set(5,12,8); sc.add(key);
   const EDGE=(mesh,color,op)=>{const e=new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry),new THREE.LineBasicMaterial({color:color,transparent:true,opacity:op==null?0.9:op})); mesh.add(e); return e;};
   const mix=(a,b,t)=>a+(b-a)*t;
@@ -694,8 +694,8 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const W=()=>innerWidth,H=()=>innerHeight;
   const sc=new THREE.Scene(); sc.fog=new THREE.FogExp2(0x1a2632,0.02);
   const cam=new THREE.PerspectiveCamera(50,W()/H(),0.1,400);
-  const rdr=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('s3-canvas')});
-  rdr.setPixelRatio(Math.min(devicePixelRatio,2));rdr.setSize(W(),H());rdr.setClearColor(0x1a2632,1);
+  const rdr=new THREE.WebGLRenderer({antialias:innerWidth>640,canvas:document.getElementById('s3-canvas')});
+  rdr.setPixelRatio(Math.min(devicePixelRatio,innerWidth<640?1:2));rdr.setSize(W(),H());rdr.setClearColor(0x1a2632,1);
   sc.add(new THREE.AmbientLight(0x4a5a64,1));const key=new THREE.DirectionalLight(0xcfe6ec,0.6);key.position.set(5,10,7);sc.add(key);
   // 冷却塔（双曲线 Lathe，缩小，别被文字块挡上下）
   const TH=4.6;
@@ -758,8 +758,8 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const W=()=>innerWidth,H=()=>innerHeight;
   const sc=new THREE.Scene(); sc.fog=new THREE.FogExp2(0x1a2632,0.018);
   const cam=new THREE.PerspectiveCamera(52,W()/H(),0.1,400);
-  const rdr=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('chip-canvas')});
-  rdr.setPixelRatio(Math.min(devicePixelRatio,2));rdr.setSize(W(),H());rdr.setClearColor(0x1a2632,1);
+  const rdr=new THREE.WebGLRenderer({antialias:innerWidth>640,canvas:document.getElementById('chip-canvas')});
+  rdr.setPixelRatio(Math.min(devicePixelRatio,innerWidth<640?1:2));rdr.setSize(W(),H());rdr.setClearColor(0x1a2632,1);
   sc.add(new THREE.AmbientLight(0x405058,0.9));const key=new THREE.DirectionalLight(0xcfe0e6,0.7);key.position.set(6,12,8);sc.add(key);
   const N=16,sp=1.18,geo=new THREE.BoxGeometry(0.92,0.22,0.92),COLD=new THREE.Color(0x16323b),HOT=new THREE.Color(0xd4502e),chips=[],grp=new THREE.Group();sc.add(grp);const cx=(N-1)/2;
   for(let x=0;x<N;x++)for(let z=0;z<N;z++){const mat=new THREE.MeshStandardMaterial({color:0x0e1c24,emissive:0x16323b,emissiveIntensity:.35,metalness:.3,roughness:.6});const m=new THREE.Mesh(geo,mat);m.position.set((x-cx)*sp,0,(z-cx)*sp);const ed=new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({color:0x24424c}));m.add(ed);const d=Math.hypot(x-cx,z-cx)/Math.hypot(cx,cx);chips.push({m,mat,d});grp.add(m);}
@@ -891,3 +891,5 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
 })();
 
 setTimeout(function(){try{dispatchEvent(new Event('resize'));}catch(e){}},80);
+
+['s1-canvas','chip-canvas','s3-canvas','s4-canvas','s6-canvas','s7-canvas'].forEach(function(id){var c=document.getElementById(id);if(c)c.addEventListener('webglcontextlost',function(e){e.preventDefault();});});
