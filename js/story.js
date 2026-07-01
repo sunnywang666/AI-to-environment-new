@@ -1,3 +1,4 @@
+var PSCALE=innerWidth<640?3:1;
 function fitFov(cam){if(cam.userData.bf===undefined)cam.userData.bf=cam.fov;var a=innerWidth/innerHeight,bf=cam.userData.bf;cam.fov=a<1?Math.min(86,bf*(1+(1/a-1)*0.6)):bf;cam.updateProjectionMatrix();}
 /* story.js — 「你问 AI 的那句话，要喝掉一口水」7 章引擎 + 科技绘图 + 芯片 Three.js
    范式：GSAP pin 分阶段时序（文字纯位移滑入定格→图渐现+动画→停留→划走→下一块），
@@ -245,9 +246,9 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     const P=cl((H-rect.top)/(H+secH));
     ctx.fillStyle="#1a2632";ctx.fillRect(0,0,W,H);
     const ein=sm(cl(P/0.42)),eout=sm(cl((P-0.58)/0.42)),A=ein*(1-eout),sweep=sm(cl((P-0.2)/0.5));
-    ctx.strokeStyle="rgba(95,182,207,.05)";ctx.lineWidth=1;
+    if(W>640){ctx.strokeStyle="rgba(95,182,207,.05)";ctx.lineWidth=1;
     for(let gx=0;gx<=W;gx+=W/16){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke();}
-    for(let gy=0;gy<=H;gy+=H/9){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();}
+    for(let gy=0;gy<=H;gy+=H/9){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();}}
     parts.forEach(pt=>{pt.y-=pt.s*0.0016;if(pt.y<0){pt.y=1;pt.x=Math.random();}ctx.fillStyle=`rgba(95,182,207,${0.28*A})`;ctx.beginPath();ctx.arc(pt.x*W,pt.y*H,pt.r,0,7);ctx.fill();});
     const cxp=W*0.5,cyp=H*0.45,nf=Math.min(H*0.52,W*0.34);
     ctx.textAlign="center";ctx.textBaseline="middle";ctx.font=`900 ${nf}px 'Noto Sans SC',sans-serif`;
@@ -259,7 +260,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     if(sweep<0.99&&A>0.05){ctx.strokeStyle=`rgba(190,235,245,${A*0.6})`;ctx.lineWidth=2;ctx.shadowColor="rgba(95,182,207,.8)";ctx.shadowBlur=16;ctx.beginPath();ctx.moveTo(lx,cyp-nf*0.42);ctx.lineTo(lx,cyp+nf*0.42);ctx.stroke();ctx.shadowBlur=0;}
     const ty=H*0.80+(1-ein)*44;ctx.textBaseline="alphabetic";
     ctx.fillStyle=`rgba(138,150,156,${A})`;ctx.font=`500 14px 'Noto Sans SC',sans-serif`;ctx.fillText(KK,cxp,ty);
-    ctx.fillStyle=`rgba(255,255,255,${A})`;ctx.font=`900 ${Math.max(24,Math.min(38,W*0.025))}px 'Noto Sans SC',sans-serif`;ctx.fillText(TT,cxp,ty+36);
+    ctx.fillStyle=`rgba(255,255,255,${A})`;let tf=Math.max(22,Math.min(38,W*0.05));ctx.font=`900 ${tf}px 'Noto Sans SC',sans-serif`;while(ctx.measureText(TT).width>W*0.9&&tf>14){tf-=1;ctx.font=`900 ${tf}px 'Noto Sans SC',sans-serif`;}ctx.fillText(TT,cxp,ty+36);
   }
   frame();
 });
@@ -312,7 +313,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const NF=300,fg=new THREE.BufferGeometry(),fp=new Float32Array(NF*3),ft=new Float32Array(NF),fsx=new Float32Array(NF),fsz=new Float32Array(NF);
   function seedFlow(i){ft[i]=Math.random();fsx[i]=-6+(Math.random()-.5)*N*sp*0.9;fsz[i]=(Math.random()-.5)*N*sp*0.9;}
   for(let i=0;i<NF;i++)seedFlow(i);fg.setAttribute('position',new THREE.BufferAttribute(fp,3));
-  const flow=new THREE.Points(fg,new THREE.PointsMaterial({color:0x9fe0ee,size:.18,transparent:true,opacity:0,depthWrite:false}));sc.add(flow);
+  const flow=new THREE.Points(fg,new THREE.PointsMaterial({color:0x9fe0ee,size:(.18)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(flow);
 
   let P=0;ScrollTrigger.create({trigger:"#s1-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const bigV=document.getElementById('s1-drained'),subV=document.querySelector('#s1-hud .u');
@@ -391,7 +392,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const NS=620,sg=new THREE.BufferGeometry(),spos=new Float32Array(NS*3),sst=new Float32Array(NS),sox=new Float32Array(NS),soz=new Float32Array(NS);
   function seedSmoke(i){const m=mouths[Math.floor(Math.random()*3)];spos[i*3]=m.x+(Math.random()-.5)*0.3;spos[i*3+1]=m.y+Math.random()*0.4;spos[i*3+2]=m.z+(Math.random()-.5)*0.3;sst[i]=Math.random();sox[i]=(Math.random()-.5);soz[i]=(Math.random()-.5)*0.6;}
   for(let i=0;i<NS;i++)seedSmoke(i);sg.setAttribute('position',new THREE.BufferAttribute(spos,3));
-  const smoke=new THREE.Points(sg,new THREE.PointsMaterial({color:0xb08a6a,size:.32,transparent:true,opacity:0,depthWrite:false}));sc.add(smoke);
+  const smoke=new THREE.Points(sg,new THREE.PointsMaterial({color:0xb08a6a,size:(.32)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(smoke);
 
   // 2D 图表 overlay（碳强度柱 / 碳排趋势）
   const cv2=document.getElementById('s4-2d'),x2=cv2.getContext('2d');
@@ -502,7 +503,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     const ox=new Float32Array(count), oy=new Float32Array(count), oz=new Float32Array(count);
     for(let i=0;i<count;i++){ t[i]=Math.random(); const a=Math.random()*6.283, r=Math.sqrt(Math.random())*rad; ox[i]=Math.cos(a)*r; oy[i]=Math.sin(a)*r*0.7; oz[i]=Math.sin(a)*r; }
     g.setAttribute('position',new THREE.BufferAttribute(pos,3));
-    const pts=new THREE.Points(g,new THREE.PointsMaterial({color:color,size:size,transparent:true,opacity:0,depthWrite:false})); sc.add(pts);
+    const pts=new THREE.Points(g,new THREE.PointsMaterial({color:color,size:(size)*PSCALE,transparent:true,opacity:0,depthWrite:false})); sc.add(pts);
     return {pts:pts,g:g,pos:pos,t:t,ox:ox,oy:oy,oz:oz,from:from,to:to,arc:arc,vapor:!!vapor};
   }
   const ptOf=(s,k)=>{const a=s.from,b=s.to; return [a.x+(b.x-a.x)*k, a.y+(b.y-a.y)*k+Math.sin(k*Math.PI)*s.arc, a.z+(b.z-a.z)*k];};
@@ -516,7 +517,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const NF=150, fg=new THREE.BufferGeometry(), fpos=new Float32Array(NF*3), fbx=new Float32Array(NF), fph=new Float32Array(NF);
   for(let i=0;i<NF;i++){ fbx[i]=-10+Math.random()*20; fpos[i*3]=fbx[i]; fpos[i*3+1]=6.4+Math.random()*2.2; fpos[i*3+2]=-4+Math.random()*4; fph[i]=Math.random()*6.283; }
   fg.setAttribute('position',new THREE.BufferAttribute(fpos,3));
-  const fogPts=new THREE.Points(fg,new THREE.PointsMaterial({color:COL.grey,size:0.9,transparent:true,opacity:0,depthWrite:false})); sc.add(fogPts);
+  const fogPts=new THREE.Points(fg,new THREE.PointsMaterial({color:COL.grey,size:(0.9)*PSCALE,transparent:true,opacity:0,depthWrite:false})); sc.add(fogPts);
 
   // 闭环：亮曲线 + 多箭头 + 流动粒子
   const loopCurve=new THREE.QuadraticBezierCurve3(new THREE.Vector3(2.4,7.2,-2),new THREE.Vector3(-8.4,9.0,0),new THREE.Vector3(-7,3.2,0));
@@ -530,7 +531,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   });
   const NL=46, lg=new THREE.BufferGeometry(), lpos=new Float32Array(NL*3), lt=new Float32Array(NL);
   for(let i=0;i<NL;i++)lt[i]=i/NL; lg.setAttribute('position',new THREE.BufferAttribute(lpos,3));
-  const loopPart=new THREE.Points(lg,new THREE.PointsMaterial({color:COL.leaf,size:0.28,transparent:true,opacity:0,depthWrite:false})); sc.add(loopPart);
+  const loopPart=new THREE.Points(lg,new THREE.PointsMaterial({color:COL.leaf,size:(0.28)*PSCALE,transparent:true,opacity:0,depthWrite:false})); sc.add(loopPart);
 
   const S={dc:0,water:0,power:0,split:0,carbon:0,loop:0};
   let P=0;
@@ -624,7 +625,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const NW=90, wg=new THREE.BufferGeometry(), wp=new Float32Array(NW*3), wt=new Float32Array(NW), wa=new Float32Array(NW);
   for(let i=0;i<NW;i++){wt[i]=Math.random(); wa[i]=Math.random()*6.283;}
   wg.setAttribute('position',new THREE.BufferAttribute(wp,3));
-  const splash=new THREE.Points(wg,new THREE.PointsMaterial({color:0xbfe4ef,size:0.16,transparent:true,opacity:0,depthWrite:false})); sc.add(splash);
+  const splash=new THREE.Points(wg,new THREE.PointsMaterial({color:0xbfe4ef,size:(0.16)*PSCALE,transparent:true,opacity:0,depthWrite:false})); sc.add(splash);
 
   // ===== 电的口径 · 电表(指针跳动)（居中，序列后半段）=====
   const mC=document.createElement('canvas'); mC.width=1240; mC.height=920; const mX=mC.getContext('2d');
@@ -717,17 +718,17 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   // 进水：水从侧上方注入塔顶（先有水进去）
   const NI=180,ig=new THREE.BufferGeometry(),ip=new Float32Array(NI*3),ist=new Float32Array(NI);
   for(let i=0;i<NI;i++)ist[i]=Math.random();ig.setAttribute('position',new THREE.BufferAttribute(ip,3));
-  const inflow=new THREE.Points(ig,new THREE.PointsMaterial({color:0x5fb6cf,size:.2,transparent:true,opacity:0,depthWrite:false}));sc.add(inflow);
+  const inflow=new THREE.Points(ig,new THREE.PointsMaterial({color:0x5fb6cf,size:(.2)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(inflow);
   // 蒸汽（多，70-80%，从塔顶升腾）
   const NE=520,eg=new THREE.BufferGeometry(),ep=new Float32Array(NE*3),est=new Float32Array(NE);
   function seedEvap(i){const a=Math.random()*6.28,rr=Math.random()*1.0;ep[i*3]=Math.cos(a)*rr;ep[i*3+1]=topY+Math.random()*0.4;ep[i*3+2]=Math.sin(a)*rr;est[i]=Math.random();}
   for(let i=0;i<NE;i++)seedEvap(i);eg.setAttribute('position',new THREE.BufferAttribute(ep,3));
-  const evap=new THREE.Points(eg,new THREE.PointsMaterial({color:0xdce9ed,size:.22,transparent:true,opacity:0,depthWrite:false}));sc.add(evap);
+  const evap=new THREE.Points(eg,new THREE.PointsMaterial({color:0xdce9ed,size:(.22)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(evap);
   // 废水（少，20-30%，从塔底沉出，暗红）
   const NW=150,wg=new THREE.BufferGeometry(),wp=new Float32Array(NW*3),wst=new Float32Array(NW);
   function seedWaste(i){const a=Math.random()*6.28,rr=1.3+Math.random()*0.5;wp[i*3]=Math.cos(a)*rr;wp[i*3+1]=-0.2;wp[i*3+2]=Math.sin(a)*rr;wst[i]=Math.random();}
   for(let i=0;i<NW;i++)seedWaste(i);wg.setAttribute('position',new THREE.BufferAttribute(wp,3));
-  const waste=new THREE.Points(wg,new THREE.PointsMaterial({color:0xc0432a,size:.16,transparent:true,opacity:0,depthWrite:false}));sc.add(waste);
+  const waste=new THREE.Points(wg,new THREE.PointsMaterial({color:0xc0432a,size:(.16)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(waste);
   let P=0;ScrollTrigger.create({trigger:"#s3-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const cbs=[...stage.querySelectorAll('.cbox')];
   const vroot=document.getElementById('s3-track');
@@ -766,7 +767,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const ST=600,sg=new THREE.BufferGeometry(),spos=new Float32Array(ST*3),svel=new Float32Array(ST);
   for(let i=0;i<ST;i++){spos[i*3]=(Math.random()-.5)*N*sp;spos[i*3+1]=Math.random()*6;spos[i*3+2]=(Math.random()-.5)*N*sp;svel[i]=.01+Math.random()*.03;}
   sg.setAttribute('position',new THREE.BufferAttribute(spos,3));
-  const steam=new THREE.Points(sg,new THREE.PointsMaterial({color:0xcfe6ec,size:.14,transparent:true,opacity:0,depthWrite:false}));sc.add(steam);
+  const steam=new THREE.Points(sg,new THREE.PointsMaterial({color:0xcfe6ec,size:(.14)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(steam);
   let P=0;ScrollTrigger.create({trigger:"#chip-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const tempV=document.getElementById('chip-temp'),waterV=document.getElementById('chip-water');
   const cbs=[...document.querySelectorAll('#chip-stage .cbox')];
