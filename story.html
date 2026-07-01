@@ -30,11 +30,11 @@
   .scene canvas{position:absolute;inset:0;width:100%;height:100%}
   /* teenager 文字块：纯黑实底·单字号·无边框无阴影·左对齐·居中约3/5 */
   .box{position:absolute;left:50%;top:16vh;transform:translateX(-50%);max-width:600px;width:auto;
-    background:#000;border-radius:2px;padding:11px 14px;z-index:2;will-change:transform}
+    background:#000;border-radius:0;padding:11px 14px;z-index:2;will-change:transform}
   .box p{font-size:18px;font-weight:400;color:#fff;line-height:1.62;margin:0}
   .box p+p{margin-top:.5em}
   /* 高光笔：实色背景+白字+不加粗+前后留空；4色语义 */
-  .hl{display:inline-block;padding:0 5px;line-height:1.46;border-radius:1px;font-weight:400;white-space:nowrap;margin:0 .14em;color:#fff;vertical-align:baseline}
+  .hl{display:inline-block;padding:0 5px;line-height:1.46;border-radius:0;font-weight:400;white-space:nowrap;margin:0 .14em;color:#fff;vertical-align:baseline}
   .hl-w{background:var(--water)} .hl-e{background:var(--ember)} .hl-g{background:var(--energy)} .hl-l{background:var(--leaf)}
   /* 统一读数：全站用电价曲线那张标杆的同一种大小/位置（单个大数 + 小注） */
   .hud-num{position:absolute;left:clamp(54px,7vw,96px);top:39vh;z-index:2;pointer-events:none;max-width:34vw}
@@ -264,7 +264,7 @@
   .hero h1{font-size:clamp(25px,7.5vw,38px);margin-bottom:26px}
   .chatbox{max-width:none}
   /* 文字框：小字号 + 撑宽保持横向长方形 + 减内距 + 上移让出 3D 场景 */
-  .box{max-width:none;width:90vw;top:9vh;padding:13px 15px;border-radius:12px}
+  .box{max-width:none;width:90vw;top:9vh;padding:13px 15px}
   .box p{font-size:14.5px;line-height:1.5}
   /* 左侧大数字：缩小并下移到屏幕下部，避开文字框与 3D 主体 */
   .hud-num{max-width:58vw;left:16px;top:auto;bottom:13vh}
