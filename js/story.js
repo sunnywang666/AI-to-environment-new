@@ -356,7 +356,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     cam.position.set(Math.sin(0.32)*r,hgt,Math.cos(0.32)*r);cam.lookAt(-1.2,2.2,0.6);
     field.rotation.y=Math.sin(P*0.5)*0.02;
     bigV.textContent=Math.round(drained);
-    if(subV)subV.textContent="亿升已被抽进数据中心 · 水源仅剩 "+Math.round(TOTAL-drained)+" 亿升（一边减、一边增，和恒定 290）";
+    if(subV)subV.textContent="亿升已被抽进数据中心 · 水源仅剩 "+Math.round(TOTAL-drained)+" 亿升";
     slideBoxes(cbs,P);rdr.render(sc,cam);}
   animate();
   addEventListener('resize',()=>{cam.aspect=W()/H();fitFov(cam);rdr.setSize(W(),H());});

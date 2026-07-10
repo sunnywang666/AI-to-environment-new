@@ -25,7 +25,7 @@ Follow a single drop of water through an AI data center — withdrawal, cooling,
 
 ## 数据来源 / Data Sources
 
-正文数字均在页面尾注标明出处：IEA《Energy and AI》(2025)、UNU-INWEH (2025)、UC Riverside/CACM (2025)、LBNL (2024)、《The Unpaid Toll》(2024)、PBS/AP (2026)、Ember/OWID、EIA、SELC (2025)、Grid Strategies (2025)、IPCC AR6。不同来源间的口径差异在正文中已明示。
+正文数字均在页面尾注标明出处：IEA《Energy and AI》(2025)、UNU-INWEH (2026)、UC Riverside/CACM (2025)、LBNL (2024)、《The Unpaid Toll》(2024)、PBS/AP (2026)、Ember/OWID、EIA、SELC (2025)、Grid Strategies (2024)、IPCC AR6。不同来源间的口径差异在正文中已明示。
 
 All figures are cited in the endnote of the story; discrepancies between sources are addressed explicitly in the text.
 
