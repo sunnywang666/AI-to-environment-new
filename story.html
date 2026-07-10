@@ -171,7 +171,7 @@
 <style>
   #s4-track{height:680vh;position:relative}
   #s4-stage{position:sticky;top:0;height:100vh;overflow:hidden;background:#1a2632}
-  #s4-canvas,#s4-2d{position:absolute;inset:0}
+  #s4-canvas,#s4-2d{position:absolute;inset:0;width:100%;height:100%}
   #s4-hud{position:absolute;inset:0;pointer-events:none;transition:opacity .35s}
 </style>
 
@@ -282,8 +282,14 @@
   /* 各段小 HUD 数值缩小 */
   #s1-hud .v,#chip-hud .v,#s3-hud .v,#s7-hud .v{font-size:21px}
   #s1-hud .k,#chip-hud .k,#s3-hud .k,#s7-hud .k{width:auto;font-size:11px}
-  /* 流向图标注缩小加宽 */
+  /* 流向图标注缩小加宽；⑦六个标注改到中部安全带（上让文字框、下让 HUD 大数），盖过桌面 inline 定位 */
   .s7lab{font-size:11px;max-width:46%;line-height:1.4}
+  #s7-labels .s7lab[data-k="loop"]{left:4% !important;top:38% !important}
+  #s7-labels .s7lab[data-k="evap"]{left:54% !important;top:36% !important;max-width:42%}
+  #s7-labels .s7lab[data-k="co2"]{right:4% !important;top:50% !important}
+  #s7-labels .s7lab[data-k="water"]{left:4% !important;top:66% !important}
+  #s7-labels .s7lab[data-k="power"]{right:4% !important;top:60% !important}
+  #s7-labels .s7lab[data-k="waste"]{left:52% !important;top:66% !important;max-width:44%}
   /* 结尾输入框缩小 */
   #closeInput{width:88vw;height:52px;font-size:14px;padding:0 16px;top:57%}
   /* 结尾静态段与来源说明 */

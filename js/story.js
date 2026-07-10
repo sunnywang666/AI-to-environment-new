@@ -134,9 +134,13 @@ function dots(total,litMax,color,label){return (ctx,p,prog,alpha,dy)=>layer(ctx,
   for(let i=0;i<total;i++){const col=i%cols,row=Math.floor(i/cols),x=p.l+col*cellW+(cellW-s)/2,y=y0+row*cellH+(cellH-s)/2;
     if(i<litN){ctx.shadowColor=color;ctx.shadowBlur=9;ctx.fillStyle=color;}else{ctx.shadowBlur=0;ctx.fillStyle="rgba(200,215,225,.10)";}
     ctx.fillRect(x,y,s,s);}
-  ctx.shadowBlur=0;const bx=p.l+(cellW-s)/2,big=Math.max(40,Math.min(60,p.W*0.044));
-  ctx.textAlign="left";ctx.textBaseline="alphabetic";ctx.fillStyle=color;ctx.font=FNT(big,700);ctx.fillText(litN+" / "+total+" 吉瓦",bx,y0-32);
-  ctx.fillStyle=C.dim;ctx.font=FNT(14);ctx.fillText(label,bx,y0-12);
+  ctx.shadowBlur=0;const bx=p.l+(cellW-s)/2,maxW=p.r-bx,bigStr=litN+" / "+total+" 吉瓦";
+  ctx.textAlign="left";ctx.textBaseline="alphabetic";
+  let big=Math.max(40,Math.min(60,p.W*0.044));ctx.font=FNT(big,700);
+  while(ctx.measureText(bigStr).width>maxW&&big>22){big-=2;ctx.font=FNT(big,700);}   // 窄屏收缩防右裁
+  ctx.font=FNT(14);const lines=Math.max(1,Math.ceil(ctx.measureText(label).width/maxW));
+  ctx.fillStyle=color;ctx.font=FNT(big,700);ctx.fillText(bigStr,bx,y0-32-(lines-1)*19);
+  ctx.fillStyle=C.dim;ctx.font=FNT(14);wrap(ctx,label,bx,y0-12-(lines-1)*19,maxW,19);   // 副标题按可用宽换行
 });}
 
 // 量筒（0.32→519ml，水青发光水面）
@@ -204,7 +208,7 @@ function trend(pts,ydom,color,big,sub){return (ctx,p,prog,alpha,dy)=>layer(ctx,a
     i===0?ctx.moveTo(xOf(xx),yOf(yv)):ctx.lineTo(xOf(xx),yOf(yv));}
   ctx.stroke();ctx.shadowBlur=0;const bf=Math.max(50,Math.min(78,p.W*0.052));
   ctx.textAlign="left";ctx.textBaseline="top";ctx.fillStyle=color;ctx.font=FNT(bf,700);ctx.fillText(big,p.l,p.t);
-  ctx.fillStyle=C.dim;ctx.font=FNT(15);ctx.fillText(sub,p.l+4,p.t+bf+6);
+  ctx.fillStyle=C.dim;ctx.font=FNT(15);wrap(ctx,sub,p.l+4,p.t+bf+6,p.r-p.l-8,20);   // 窄屏换行防右裁
 });}
 
 /* ---------- 注册 7 章（s1 取水、s3 水分两路、chip 芯片为 3D；s4 烟囱为 3D，单独写） ---------- */
@@ -218,14 +222,17 @@ function trend(pts,ydom,color,big,sub){return (ctx,p,prog,alpha,dy)=>layer(ctx,a
   rz();addEventListener('resize',rz);
   ScrollTrigger.create({trigger:sec,start:"top top",end:"+="+(boxes.length*3400),pin:true,scrub:true,onUpdate:s=>P=s.progress});
   const drawPrice=price(),drawDots=dots(166,90,C.energy,"每格 1 吉瓦 · 亮起的是数据中心新增用电，约占新增的一半");
+  const DBG=new URLSearchParams(location.search).get('dbgp');
   function frame(){requestAnimationFrame(frame);
-    if(!vis(sec,300))return;
-    ctx.clearRect(0,0,W,H);
+    if(DBG!==null)P=parseFloat(DBG);
+    else if(!vis(sec,300))return;
+    ctx.fillStyle="#1a2632";ctx.fillRect(0,0,W,H);   // 不透明底：手机浏览器上一切残影/叠影直接盖掉
     const g=Math.max(54,Math.min(96,W*0.07)),p={l:g+34,r:W-g,t:H*0.40,b:H*0.86,W,H};
     const curveP=sm(cl(P/0.46));           // 曲线只画一次（前两段），画完保持，不随每块重放
-    const toDots=sm(cl((P-0.62)/0.08));    // 讲到负荷时，曲线交叉淡出 → 点阵
-    if(toDots<1) drawPrice(ctx,p,curveP,1-toDots,0);
-    if(toDots>0) drawDots(ctx,p,sm(cl((P-0.66)/0.3)),toDots,(1-toDots)*30);
+    const priceOut=sm(cl((P-0.58)/0.06));  // 曲线先完全退场（0.64 前清空）
+    const dotsIn=sm(cl((P-0.655)/0.06));   // 点阵 0.655 才进场：中间留空档，两图绝不同屏叠影
+    if(priceOut<1) drawPrice(ctx,p,curveP,1-priceOut,0);
+    if(dotsIn>0) drawDots(ctx,p,sm(cl((P-0.68)/0.28)),dotsIn,(1-dotsIn)*30);
     slideBoxes(boxes,P);
   }
   frame();
