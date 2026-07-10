@@ -29,12 +29,12 @@ body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased
     #242c37 0%, #1d242d 11%, #1b222b 25%,
     #232019 43%, #2b1c12 62%, #20140d 82%, #130d08 100%);}
 
-/* 颗粒做旧（细噪点平铺，overlay 叠加）——调淡，避免发灰发脏 */
-.tex{position:absolute;inset:0;z-index:60;pointer-events:none;mix-blend-mode:overlay;opacity:.1;
+/* 颗粒做旧（细噪点平铺，overlay 叠加） */
+.tex{position:absolute;inset:0;z-index:60;pointer-events:none;mix-blend-mode:overlay;opacity:.55;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size:240px 240px;}
 /* 扫描线（极淡，营造数字屏幕感） */
-.scan{position:absolute;inset:0;z-index:61;pointer-events:none;mix-blend-mode:soft-light;opacity:.14;
+.scan{position:absolute;inset:0;z-index:61;pointer-events:none;mix-blend-mode:soft-light;opacity:.5;
   background:repeating-linear-gradient(0deg, rgba(0,0,0,.5) 0 2px, transparent 2px 6px);}
 /* 纵向脊柱（一道贯穿的水/电管线） */
 .spine{position:absolute;left:150px;top:0;bottom:0;width:6px;z-index:2;pointer-events:none;opacity:.5;
@@ -43,9 +43,9 @@ body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased
 
 /* ---------- band 通用 ---------- */
 .band{position:relative;width:var(--W);padding:0 var(--pad);overflow:hidden;z-index:3}
-.b-title{height:1300px}.b-map{height:1700px}.b-skyline{height:1300px}
-.b-split{height:1250px}.b-carbon{height:1300px}.b-bills{height:1500px}
-.b-scale{height:1300px}.b-jevons{height:1450px}.b-foot{height:711px}
+.b-title{height:1300px}.b-map{height:2244px}.b-skyline{height:1417px}
+.b-split{height:1772px}.b-bills{height:1535px}.b-scale{height:1299px}
+.b-jevons{height:1535px}.b-foot{height:709px}
 .band+.band::before{content:"";position:absolute;top:0;left:var(--pad);right:var(--pad);height:2px;
   background:linear-gradient(90deg,transparent,rgba(244,242,236,.18) 20%,rgba(244,242,236,.18) 80%,transparent);}
 .bandnum{position:absolute;right:120px;top:64px;font-family:var(--mono);font-size:180px;font-weight:700;
@@ -56,8 +56,8 @@ body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased
   text-transform:uppercase;margin:0 0 26px;position:relative}
 .kicker::before{content:"";display:inline-block;width:84px;height:6px;background:var(--energy);
   vertical-align:middle;margin-right:28px;transform:translateY(-10px)}
-.title{font-weight:900;font-size:124px;line-height:1.14;letter-spacing:.005em;margin:0 0 30px}
-.title2{font-weight:900;font-size:124px;line-height:1.14;margin:0 0 30px}
+.title{font-weight:900;font-size:152px;line-height:1.1;letter-spacing:.005em;margin:0 0 40px}
+.title2{font-weight:900;font-size:104px;line-height:1.12;margin:0 0 30px}
 .body{font-size:52px;line-height:1.62;max-width:3600px;margin:0 0 44px;color:#E6E2D8}
 .body.center{text-align:center;margin-left:auto;margin-right:auto}
 .source{font-family:var(--mono);font-size:32px;line-height:1.55;color:var(--dim);max-width:3900px}
@@ -79,11 +79,11 @@ b,strong{font-weight:900}
 .glitch-num::before{color:var(--gl-r);transform:translate(-3px,0);mix-blend-mode:screen;opacity:.6}
 .glitch-num::after{color:var(--gl-c);transform:translate(3px,0);mix-blend-mode:screen;opacity:.6}
 
-/* ---------- BAND 0 · 标题（垂直居中，上下大留白） ---------- */
-.b-title{display:flex;flex-direction:column;justify-content:center;padding-top:300px;padding-bottom:300px}
+/* ---------- BAND 0 · 标题（垂直居中，上下留白一致） ---------- */
+.b-title{display:flex;flex-direction:column;justify-content:center;padding-top:120px;padding-bottom:120px}
 .b-title .kicker{font-size:50px}
-.hero{font-weight:900;font-size:300px;line-height:1.0;letter-spacing:.02em;margin:6px 0 0;color:var(--ink)}
-.hero-sub{font-family:var(--serif);font-size:84px;color:#D8D2C6;margin:24px 0 56px;letter-spacing:.04em}
+.hero{font-weight:900;font-size:340px;line-height:1.0;letter-spacing:.02em;margin:6px 0 0;color:var(--ink)}
+.hero-sub{font-family:var(--serif);font-size:90px;color:#D8D2C6;margin:22px 0 52px;letter-spacing:.04em}
 .hero-fact{display:flex;align-items:flex-start;gap:56px;border-top:3px solid rgba(244,242,236,.22);padding-top:48px}
 .drop{flex:none;width:120px;height:160px;margin-top:12px;
   background:radial-gradient(60% 55% at 50% 62%,var(--water),#3c6675 70%,transparent 100%);
@@ -93,46 +93,34 @@ b,strong{font-weight:900}
 .hero-fact__txt .big .dim{font-size:46px;font-weight:400}
 .hero-fact__txt .lead2{font-size:48px;color:#D8D2C6;margin:0;line-height:1.4}
 
-/* ---------- 并排双图 ---------- */
-.viz2{display:grid;grid-template-columns:1fr 1fr;gap:90px;align-items:start;width:100%}
-.viz2 .viz{width:100%}
-
 /* ---------- BAND 1 · 地图 ---------- */
-.b-map .viz{width:100%;height:1040px;margin:24px 0 22px}
+.b-map .viz{width:100%;height:1320px;margin:30px 0 24px}
 .map-notes{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin:0 0 30px}
 .mnote{border-left:8px solid var(--water);padding-left:40px}
 .mnote__h{font-size:52px;font-weight:900;margin:0 0 14px}
 .mnote__b{font-size:44px;line-height:1.5;color:#E6E2D8;margin:0}
 
-/* ---------- BAND 2 · 排行榜 | 增速曲线 ---------- */
-.b-skyline .viz2{margin:14px 0 18px}
-.b-skyline .viz2 .viz{height:720px}
+/* ---------- BAND 2 · 天际线 ---------- */
+.b-skyline .viz{width:100%;height:760px;margin:18px 0 22px}
 
-/* ---------- BAND 3 · 水两条路 | 用水差异 ---------- */
-.b-split .viz2{margin:14px 0 18px}
-.b-split .viz2 .viz{height:680px}
+/* ---------- BAND 3 · 两条路 + 碳 ---------- */
+.b-split .viz#viz-split{width:100%;height:560px;margin:10px 0 18px}
+.b-split .subhead{margin-top:34px}
+.b-split .viz#viz-carbon{width:100%;height:470px;margin:8px 0 18px}
 
-/* ---------- BAND 4 · 碳趋势 | 空气污染 ---------- */
-.b-carbon .viz2{margin:18px 0 18px}
-.b-carbon .viz2 .viz{height:780px}
+/* ---------- BAND 4 · 账单票据 ---------- */
+.b-bills .viz{width:100%;height:780px;margin:24px 0 18px}
 
-/* ---------- BAND 5 · 票据 + 电价 | 负荷占比 ---------- */
-.b-bills .viz#viz-bills{width:100%;height:540px;margin:14px 0 10px}
-.b-bills .viz2{margin:4px 0 10px}
-.b-bills .viz2 .viz{height:440px}
-
-/* ---------- BAND 6 · 千倍 | 三口径 ---------- */
+/* ---------- BAND 5 · 算不清 ---------- */
 .b-scale{text-align:center}
 .b-scale .kicker{display:inline-block}
-.b-scale .viz2{margin:14px 0 14px}
-.b-scale .viz2 .viz{height:600px}
-.threeq{display:flex;justify-content:center;gap:90px;margin:16px 0 24px;
-  font-family:var(--serif);font-size:84px;font-weight:900;color:var(--ember)}
+.b-scale .viz{width:100%;height:540px;margin:24px 0 26px}
+.threeq{display:flex;justify-content:center;gap:90px;margin:18px 0 30px;
+  font-family:var(--serif);font-size:92px;font-weight:900;color:var(--ember)}
 
-/* ---------- BAND 7 · 杰文斯 | 四情景 + 收尾 ---------- */
-.b-jevons .viz2{margin:14px 0 18px}
-.b-jevons .viz2 .viz{height:680px}
-.ending{font-family:var(--serif);font-size:84px;line-height:1.4;text-align:center;color:var(--ink);
+/* ---------- BAND 6 · 杰文斯 + 收尾 ---------- */
+.b-jevons .viz{width:100%;height:700px;margin:18px 0 26px}
+.ending{font-family:var(--serif);font-size:96px;line-height:1.4;text-align:center;color:var(--ink);
   margin:6px auto 0;max-width:3800px;letter-spacing:.02em}
 
 /* ---------- BAND 7 · footer + 二维码 ---------- */
@@ -151,33 +139,3 @@ b,strong{font-weight:900}
 .viz svg{display:block;width:100%;height:100%;overflow:visible}
 .viz text{font-family:var(--sans)}
 .v-num{font-family:var(--mono);font-variant-numeric:tabular-nums}
-
-/* ============ 灵动化：错落 / 明暗节奏 / 废土故障 ============ */
-/* 1) 错落：左右列宽不对称 + 右图底对齐，打破对称网格 */
-.b-skyline .viz2{grid-template-columns:1.28fr 0.72fr}
-.b-split   .viz2{grid-template-columns:1.3fr 0.7fr}
-.b-carbon  .viz2{grid-template-columns:0.72fr 1.28fr}
-.b-scale   .viz2{grid-template-columns:1.32fr 0.68fr}
-.b-jevons  .viz2{grid-template-columns:0.7fr 1.3fr}
-.viz2{align-items:end}
-.viz2 .viz:first-child{align-self:start}
-
-/* 2) 明暗节奏：重点段用干净的黑色压暗（不加脏棕），制造轻重起伏 */
-.b-carbon{background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.26) 50%,transparent 100%)}
-.b-bills {background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.3) 52%,transparent 100%)}
-.b-scale {background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.24) 50%,transparent 100%)}
-
-/* 3) 废土故障：段间分隔改成青/红错位 + 米白主线的断裂线 */
-.band+.band::before{height:0;background:none}
-.band+.band::after{content:"";position:absolute;top:-2px;left:var(--pad);right:var(--pad);height:4px;z-index:4;pointer-events:none;
-  background:
-    linear-gradient(90deg,transparent 0,var(--gl-c) 5%,transparent 13%,transparent 38%,rgba(244,242,236,.24) 50%,rgba(244,242,236,.24) 70%,transparent 80%),
-    linear-gradient(90deg,transparent 20%,var(--gl-r) 28%,transparent 36%,transparent 88%,var(--energy) 95%,transparent 100%);
-  background-position:0 0,0 3px;background-repeat:no-repeat;mix-blend-mode:screen;opacity:.7}
-
-/* ---------- 导出矢量 PDF（供 Illustrator 打开编辑）：1250mm×3128mm = 4724×11811px@96dpi，比例严格 2:5 ---------- */
-@media print{
-  @page{ size:1250mm 3128mm; margin:0; }
-  html,body{ width:4724px; }
-  .poster{ box-shadow:none; }
-}

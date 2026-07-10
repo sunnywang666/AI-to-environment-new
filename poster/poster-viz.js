@@ -32,12 +32,10 @@
     g.append('circle').attr('cx',x).attr('cy',y).attr('r',s*2.4).attr('fill','none').attr('stroke',color).attr('stroke-width',2).attr('opacity',.28);
   }
   function txt(sel,x,y,s,fill,t,opt={}){
-    const el=sel.append('text').attr('x',x).attr('y',y).attr('font-size',s).attr('fill',fill)
+    return sel.append('text').attr('x',x).attr('y',y).attr('font-size',s).attr('fill',fill)
       .attr('font-family',opt.font||C.sans).attr('font-weight',opt.w||400)
       .attr('text-anchor',opt.anchor||'start').attr('letter-spacing',opt.ls||0)
       .style('mix-blend-mode',opt.blend||'normal').text(t);
-    if(opt.stroke){ el.attr('stroke',opt.stroke).attr('stroke-width',opt.sw||5).attr('paint-order','stroke').attr('stroke-linejoin','round'); }
-    return el;
   }
 
   /* ============ 1. 中美缺水地图 + 数据中心集群（重做） ============ */
@@ -71,8 +69,8 @@
       const lx=x+dir*46, ty=y-70;
       g.append('line').attr('x1',x).attr('y1',y).attr('x2',lx).attr('y2',ty+30).attr('stroke',C.energy).attr('stroke-width',2).attr('opacity',.8);
       const a=dir>0?'start':'end';
-      txt(g,lx,ty,38,C.ink,t1,{w:900,anchor:a,stroke:'#160f08',sw:7});
-      txt(g,lx,ty+40,30,'#E8C9A0',t2,{font:C.mono,anchor:a,stroke:'#160f08',sw:6});
+      txt(g,lx,ty,38,C.ink,t1,{w:900,anchor:a});
+      txt(g,lx,ty+40,30,C.energy,t2,{font:C.mono,anchor:a});
     }
 
     // ---- 中国 ----
@@ -93,23 +91,17 @@
 
     // ---- 美国：1479 个真实数据中心坐标做密度散点 ----
     if(us && us.features){
-      // 只画本土 48 州：去掉 Alaska(02)/Hawaii(15)/Puerto Rico(72)，消除 albersUsa 左下角的剪裁框，本土填满更像地图
-      const us48={type:'FeatureCollection',features:us.features.filter(f=>!['02','15','72'].includes(String(f.id)))};
-      const proj=(d3.geoAlbersUsa?d3.geoAlbersUsa():d3.geoMercator()).fitExtent([[pad,pad],[halfW-pad,mapH-pad]],us48);
+      const proj=(d3.geoAlbersUsa?d3.geoAlbersUsa():d3.geoMercator()).fitExtent([[pad,pad],[halfW-pad,mapH-pad]],us);
       const path=d3.geoPath(proj);
-      // 与中国同款缺水分级着色（提亮，告别全黑），西南/西部为重旱
+      // 统一低对比陆地 + 西南极淡干旱暗示（避免方块感）
       const sev=/^(04|32|49|35|48)$/, med=/^(06|08|16|56|41)$/;
-      gUS.selectAll('path').data(us48.features).join('path').attr('d',path)
-        .attr('fill',d=>{const id=d.id||''; return sev.test(id)?AR_SEV:med.test(id)?AR_MED:AR_BASE;})
-        .attr('stroke',AR_LINE).attr('stroke-width',1.1).attr('stroke-linejoin','round');
-      // 真实数据中心点：提亮 + 描边 + 底层辉光，越扎堆越亮
+      gUS.selectAll('path').data(us.features).join('path').attr('d',path)
+        .attr('fill',d=>{const id=d.id||''; return sev.test(id)?'#3a2c1c':med.test(id)?'#332a1b':'#2c2418';})
+        .attr('stroke','#4a3c2c').attr('stroke-width',1).attr('stroke-linejoin','round');
+      // 真实数据中心点
       const dots=[]; (window.US_DC||[]).forEach(d=>{const p=proj(d); if(p) dots.push(p);});
-      const gd=gUS.append('g').attr('class','dcpts');
-      gd.selectAll('circle.halo').data(dots).join('circle').attr('class','halo')
-        .attr('cx',d=>d[0]).attr('cy',d=>d[1]).attr('r',7).attr('fill',C.energy).attr('opacity',.12);
-      gd.selectAll('circle.dot').data(dots).join('circle').attr('class','dot')
-        .attr('cx',d=>d[0]).attr('cy',d=>d[1]).attr('r',5).attr('fill',C.energy)
-        .attr('opacity',.9).attr('stroke','#1b120a').attr('stroke-width',.7);
+      gUS.append('g').attr('class','dcpts').selectAll('circle').data(dots).join('circle')
+        .attr('cx',d=>d[0]).attr('cy',d=>d[1]).attr('r',4.5).attr('fill',C.energy).attr('opacity',.42);
       // 弗吉尼亚走廊高亮 + 标注
       const bp=proj([-77.5,39.0]);
       if(bp){ mapNode(gUS,bp[0],bp[1],true,C.ember); bigLabel(gUS,bp[0],bp[1],-1,'弗吉尼亚·数据中心走廊','约600座｜占全州40%用电'); }
@@ -285,7 +277,7 @@
   function renderJevons(){
     const o=mk('viz-jevons'); if(!o) return;
     const {svg,w,h}=o;
-    const padL=130,padR=130,padT=70,padB=128;
+    const padL=130,padR=130,padT=70,padB=90;
     const years=[2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030];
     const total=[200,225,255,290,330,370,415,448,540,640,740,840,945];
     const eff=[100,82,66,52,41,33,27,22,18,15,13,12,11];
@@ -318,6 +310,7 @@
   /* ============ 真二维码（离线生成，指向线上网站） ============ */
   function renderQR(){
     const el=$('#qr'); if(!el) return;
+    if(window.QR_IMG){ el.innerHTML='<img src="'+window.QR_IMG+'" alt="QR" style="width:100%;height:100%;object-fit:contain;display:block;background:#fff">'; return; }
     const d=window.QR_DATA;
     if(!d){ el.innerHTML='<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill="#fff"/><text x="50" y="54" text-anchor="middle" font-size="11" fill="#111" font-family="monospace">QR?</text></svg>'; return; }
     const n=d.size, q=4, N=n+q*2;
@@ -326,157 +319,6 @@
     for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(d.matrix[r][c]) path+=`M${c+q},${r+q}h1v1h-1z`;
     s+=`<path d="${path}" fill="#141414"/></svg>`;
     el.innerHTML=s;
-  }
-
-  /* ===== 通用：折线坐标系（海报大尺寸） ===== */
-  function axes(svg,w,h,p,xticks,xdom,ydom,xfmt,ytitle){
-    const X=d3.scaleLinear().domain(xdom).range([p.l,w-p.r]);
-    const Y=d3.scaleLinear().domain(ydom).range([h-p.b,p.t]);
-    svg.append('line').attr('x1',p.l).attr('x2',w-p.r).attr('y1',h-p.b).attr('y2',h-p.b).attr('stroke',C.dim2).attr('stroke-width',2);
-    xticks.forEach(t=>txt(svg,X(t),h-p.b+46,28,C.dim,xfmt?xfmt(t):t,{anchor:'middle',font:C.mono}));
-    const gy=ydom[1];[gy*0.25,gy*0.5,gy*0.75,gy].forEach(v=>{const yy=Y(v);svg.append('line').attr('x1',p.l).attr('x2',w-p.r).attr('y1',yy).attr('y2',yy).attr('stroke',C.dim2).attr('stroke-width',1).attr('opacity',.28);txt(svg,p.l-16,yy+9,24,C.dim2,Math.round(v),{anchor:'end',font:C.mono});});
-    if(ytitle) txt(svg,p.l,44,32,C.dim,ytitle,{font:C.mono});
-    return {X,Y};
-  }
-
-  /* ============ ②附：数据中心用电加速曲线 ============ */
-  function renderGrowth(){
-    const o=mk('viz-growth'); if(!o) return;
-    const {svg,w,h}=o; const p={l:160,r:230,t:80,b:96};
-    const {X,Y}=axes(svg,w,h,p,[2020,2024,2027,2030],[2020,2030],[0,1000],null,'全球数据中心年用电（太瓦时）· 一条还在加速的曲线');
-    const real=[[2020,250],[2022,300],[2024,415],[2025,448]], pred=[[2025,448],[2027,640],[2030,945]];
-    const ln=d3.line().x(d=>X(d[0])).y(d=>Y(d[1]));
-    const ar=d3.area().x(d=>X(d[0])).y0(h-p.b).y1(d=>Y(d[1]));
-    svg.append('path').datum(real.concat(pred.slice(1))).attr('d',ar).attr('fill',C.energy).attr('opacity',.12);
-    svg.append('path').datum(real).attr('d',ln).attr('fill','none').attr('stroke',C.energy).attr('stroke-width',7);
-    svg.append('path').datum(pred).attr('d',ln).attr('fill','none').attr('stroke',C.energy).attr('stroke-width',7).attr('stroke-dasharray','16 12');
-    svg.append('circle').attr('cx',X(2025)).attr('cy',Y(448)).attr('r',11).attr('fill',C.energy);
-    txt(svg,X(2025)-14,Y(448)+54,30,C.energy,'2025 · 448',{anchor:'middle',w:900,font:C.mono});
-    glitchNode(svg,X(2030),Y(945),22,C.energy);
-    txt(svg,X(2030)+34,Y(945)+12,46,C.energy,'2030',{anchor:'start',w:900,font:C.mono,stroke:'#160f08',sw:6});
-    txt(svg,X(2030)+34,Y(945)+58,40,C.energy,'945 TWh',{anchor:'start',w:900,font:C.mono,stroke:'#160f08',sw:6});
-    txt(svg,p.l+8,p.t+50,30,C.dim,'年增约 12%，是全球电力增速的 4 倍',{font:C.mono});
-  }
-
-  /* ============ ④主：数据中心碳排放六年翻倍 ============ */
-  function renderCarbonTrend(){
-    const o=mk('viz-carbontrend'); if(!o) return;
-    const {svg,w,h}=o; const p={l:170,r:260,t:80,b:96};
-    const {X,Y}=axes(svg,w,h,p,[2024,2026,2028,2030],[2024,2030],[0,4.5],null,'数据中心相关年碳排放（亿吨 CO₂）· 六年翻一倍');
-    const pts=[[2024,1.8],[2027,2.8],[2030,4.0]];
-    const ar=d3.area().x(d=>X(d[0])).y0(h-p.b).y1(d=>Y(d[1]));
-    const ln=d3.line().x(d=>X(d[0])).y(d=>Y(d[1]));
-    svg.append('path').datum(pts).attr('d',ar).attr('fill',C.leaf).attr('opacity',.18);
-    svg.append('path').datum(pts).attr('d',ln).attr('fill','none').attr('stroke',C.leaf).attr('stroke-width',7).attr('stroke-dasharray','16 12');
-    svg.append('circle').attr('cx',X(2024)).attr('cy',Y(1.8)).attr('r',10).attr('fill',C.leaf);
-    txt(svg,X(2024)+20,Y(1.8)-26,38,C.leaf,'2024 · 1.8 亿吨',{anchor:'start',w:900,font:C.mono,stroke:'#160f08',sw:6});
-    glitchNode(svg,X(2030),Y(4.0),20,C.leaf);
-    txt(svg,X(2030)-20,Y(4.0)-30,46,C.leaf,'2030 · ≈4 亿吨',{anchor:'end',w:900,font:C.mono,stroke:'#160f08',sw:6});
-    txt(svg,p.l+8,p.t+50,28,C.dim,'相当于六年里，数据中心的碳足迹整整多出一倍',{font:C.mono});
-  }
-
-  /* ============ ④附：供电、备电正在污染空气 ============ */
-  function renderDiesel(){
-    const o=mk('viz-diesel'); if(!o) return;
-    const {svg,w,h}=o;
-    const items=[
-      {big:'+79%',cap:['xAI 数据中心投运后','紧邻厂区 NO₂ 峰值上升'],gl:true},
-      {big:'234',cap:['亚马逊一处园区许可上的','柴油发电机（台）']},
-      {big:'$200亿',cap:['2030 年美国数据中心','空气污染年健康损失']},
-      {big:'~1300',cap:['每年最多由此导致的','过早死亡（人）']}
-    ];
-    const cols=2, cw=w/cols, ch=h/2;
-    items.forEach((d,i)=>{
-      const cx=(i%cols)*cw+cw/2, cy=Math.floor(i/cols)*ch+ch*0.46, g=svg.append('g');
-      if(d.gl){ txt(g,cx,cy,130,C.ember,d.big,{anchor:'middle',w:900,font:C.mono,blend:'normal'}).attr('filter','url(#rgbsplit)'); }
-      else txt(g,cx,cy,130,C.ember,d.big,{anchor:'middle',w:900,font:C.mono});
-      d.cap.forEach((line,li)=>txt(g,cx,cy+62+li*42,33,'#D8D2C6',line,{anchor:'middle'}));
-    });
-    svg.append('line').attr('x1',w/2).attr('y1',h*0.10).attr('x2',w/2).attr('y2',h*0.90).attr('stroke',C.dim2).attr('stroke-width',1).attr('opacity',.4);
-    svg.append('line').attr('x1',w*0.05).attr('y1',h/2).attr('x2',w*0.95).attr('y2',h/2).attr('stroke',C.dim2).attr('stroke-width',1).attr('opacity',.4);
-  }
-
-  /* ============ ⑤附：西弗吉尼亚电价爬升 ============ */
-  function renderPriceline(){
-    const o=mk('viz-priceline'); if(!o) return;
-    const {svg,w,h}=o; const p={l:150,r:200,t:76,b:96};
-    const {X,Y}=axes(svg,w,h,p,[2000,2008,2014,2020],[2000,2020],[0,14],null,'西弗吉尼亚居民电价（美分/千瓦时）');
-    const wv=[[2000,6.27],[2008,7.06],[2014,9.34],[2020,11.8]], us=[[2000,8.24],[2008,11.26],[2014,12.52],[2020,13.15]];
-    const ln=d3.line().x(d=>X(d[0])).y(d=>Y(d[1]));
-    svg.append('path').datum(us).attr('d',ln).attr('fill','none').attr('stroke',C.dim).attr('stroke-width',5).attr('stroke-dasharray','12 8');
-    svg.append('path').datum(wv).attr('d',ln).attr('fill','none').attr('stroke',C.ember).attr('stroke-width',7);
-    txt(svg,X(2020),Y(13.15)-22,30,C.dim,'全美均值',{anchor:'end',font:C.mono});
-    txt(svg,X(2020),Y(11.8)+48,38,C.ember,'西弗 · 十年 +73%',{anchor:'end',w:900,font:C.mono,stroke:'#160f08',sw:6});
-    txt(svg,p.l+8,p.t+48,28,C.dim,'该州 87% 的电来自老旧燃煤；数据中心是新增用电里最大的一块',{font:C.mono});
-  }
-
-  /* ============ ⑤附：新增电力一半来自数据中心（环形） ============ */
-  function renderLoadshare(){
-    const o=mk('viz-loadshare'); if(!o) return;
-    const {svg,w,h}=o;
-    // 左：环形（中心只放 54%）；右：文字说明 —— 字图分开，互不重叠
-    const cx=w*0.26, cy=h*0.54, R=Math.min(h*0.34,w*0.20), sw=R*0.40;
-    const pct=90/166, circ=2*Math.PI*R;
-    svg.append('circle').attr('cx',cx).attr('cy',cy).attr('r',R).attr('fill','none').attr('stroke','#3a2e22').attr('stroke-width',sw);
-    svg.append('circle').attr('cx',cx).attr('cy',cy).attr('r',R).attr('fill','none').attr('stroke',C.energy).attr('stroke-width',sw)
-      .attr('stroke-dasharray',circ*pct+' '+circ).attr('transform','rotate(-90 '+cx+' '+cy+')');
-    txt(svg,cx,cy+26,92,C.energy,'54%',{anchor:'middle',w:900,font:C.mono});
-    const tx=w*0.50;
-    txt(svg,tx,cy-96,40,C.ink,'未来五年美国',{w:700});
-    txt(svg,tx,cy-44,40,C.ink,'新增电力负荷 166 吉瓦',{w:700});
-    txt(svg,tx,cy+34,48,C.energy,'一半是为数据中心而建',{w:900,font:C.mono});
-    txt(svg,tx,cy+96,32,C.dim,'电厂、电网的成本，摊进每个人的账单',{font:C.mono});
-  }
-
-  /* ============ ③附：同一次查询，不同地区用水差近 7 倍 ============ */
-  function renderRegional(){
-    const o=mk('viz-regional'); if(!o) return;
-    const {svg,w,h}=o;
-    const data=[{n:'华盛顿州',v:10.5,c:C.ember},{n:'美国均值',v:30,c:C.dim},{n:'爱尔兰',v:70.4,c:C.water}];
-    const padL=420,padR=240,padT=140,padB=110, maxv=80;
-    const X=d3.scaleLinear().domain([0,maxv]).range([padL,w-padR]);
-    const rowH=(h-padT-padB)/data.length;
-    txt(svg,40,56,30,C.dim,'同一次查询，每瓶 500ml 水能问几次（越少越费水）',{font:C.mono});
-    data.forEach((d,i)=>{
-      const y=padT+i*rowH+rowH*0.5, bh=Math.min(96,rowH*0.46);
-      svg.append('rect').attr('x',padL).attr('y',y-bh/2).attr('width',Math.max(2,X(d.v)-padL)).attr('height',bh).attr('fill',d.c).attr('opacity',.85);
-      txt(svg,padL-28,y+15,44,C.ink,d.n,{anchor:'end',w:700});
-      txt(svg,X(d.v)+20,y+15,44,d.c,d.v+' 次',{anchor:'start',w:900,font:C.mono});
-    });
-    txt(svg,w*0.5,h-30,36,C.water,'最费水的地方 ≈ 最省的 1/7',{anchor:'middle',w:900,font:C.mono});
-  }
-
-  /* ============ ⑥附：连"一年用多少电"都对不上 ============ */
-  function renderThree(){
-    const o=mk('viz-three'); if(!o) return;
-    const {svg,w,h}=o;
-    const data=[{n:'IEA 2024',v:415},{n:'UNU 2025',v:448},{n:'IEA 2025',v:485}];
-    const padB=110,padT=80,maxv=560, bw=w*0.15, gap=(w-bw*3)/4;
-    const Y=d3.scaleLinear().domain([0,maxv]).range([h-padB,padT]);
-    svg.append('line').attr('x1',gap*0.5).attr('x2',w-gap*0.5).attr('y1',h-padB).attr('y2',h-padB).attr('stroke',C.dim2).attr('stroke-width',2);
-    data.forEach((d,i)=>{
-      const x=gap+i*(bw+gap);
-      svg.append('rect').attr('x',x).attr('y',Y(d.v)).attr('width',bw).attr('height',h-padB-Y(d.v)).attr('fill',C.water).attr('opacity',.85);
-      txt(svg,x+bw/2,Y(d.v)-24,52,C.water,d.v,{anchor:'middle',w:900,font:C.mono});
-      txt(svg,x+bw/2,h-padB+46,34,C.ink,d.n,{anchor:'middle',font:C.mono});
-    });
-    txt(svg,gap,44,30,C.dim,'全球数据中心年用电的三个权威口径（太瓦时）—— 同一年，差出 70 太瓦时',{font:C.mono});
-  }
-
-  /* ============ ⑦附：用电翻倍 · 四情景 ============ */
-  function renderFuturefan(){
-    const o=mk('viz-futurefan'); if(!o) return;
-    const {svg,w,h}=o; const p={l:150,r:300,t:76,b:96};
-    const {X,Y}=axes(svg,w,h,p,[2025,2030,2035],[2025,2035],[0,1800],null,'全球数据中心用电四情景（太瓦时）· 未来取决于现在的选择');
-    const hi=[[2025,448],[2030,1100],[2035,1720]], base=[[2025,448],[2030,945],[2035,1200]], eff=[[2025,448],[2030,800],[2035,970]];
-    const ln=d3.line().x(d=>X(d[0])).y(d=>Y(d[1]));
-    [[hi,C.ember,'更高 1720'],[base,C.energy,'基准 1200'],[eff,C.water,'高效率 970']].forEach(([pts,col,lab])=>{
-      svg.append('path').datum(pts).attr('d',ln).attr('fill','none').attr('stroke',col).attr('stroke-width',6).attr('stroke-dasharray','16 12');
-      const last=pts[pts.length-1];
-      txt(svg,X(last[0])+16,Y(last[1])+12,36,col,lab,{anchor:'start',w:900,font:C.mono,stroke:'#160f08',sw:6});
-    });
-    svg.append('circle').attr('cx',X(2025)).attr('cy',Y(448)).attr('r',11).attr('fill',C.ink);
-    txt(svg,X(2025),Y(448)+52,30,C.ink,'2025 · 448',{anchor:'middle',w:900,font:C.mono});
   }
 
   /* ----- band 切片 ----- */
@@ -496,18 +338,11 @@
 
   function boot(){
     try{renderSkyline();}catch(e){console.error('skyline',e);}
-    try{renderGrowth();}catch(e){console.error('growth',e);}
     try{renderSplit();}catch(e){console.error('split',e);}
-    try{renderRegional();}catch(e){console.error('regional',e);}
-    try{renderCarbonTrend();}catch(e){console.error('carbontrend',e);}
-    try{renderDiesel();}catch(e){console.error('diesel',e);}
+    try{renderCarbon();}catch(e){console.error('carbon',e);}
     try{renderBills();}catch(e){console.error('bills',e);}
-    try{renderPriceline();}catch(e){console.error('priceline',e);}
-    try{renderLoadshare();}catch(e){console.error('loadshare',e);}
     try{renderScale();}catch(e){console.error('scale',e);}
-    try{renderThree();}catch(e){console.error('three',e);}
     try{renderJevons();}catch(e){console.error('jevons',e);}
-    try{renderFuturefan();}catch(e){console.error('futurefan',e);}
     try{renderQR();}catch(e){console.error('qr',e);}
     renderMap().catch(e=>console.error('map',e));
     applyBandMode();
