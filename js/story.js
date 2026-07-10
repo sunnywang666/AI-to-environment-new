@@ -19,6 +19,47 @@ function vis(el,m){if(!el)return true;const r=el.getBoundingClientRect();return 
 // 停在半路看到的要么是播放中、要么是定格真值，绝不会是错的数。只有时间序列(进度=年份)和纯氛围动画才 scrub。
 function trigProg(st,on,durSec){ if(on&&st.p<1) st.p=Math.min(1,st.p+1/(60*durSec)); return st.p; }
 
+/* ---------- 开场聊天框：滚动演示打字(参考 MIT typewriter-chat 原作手法) + 真输入能耗估算(V1 chat.js 逻辑) ----------
+   往下滚：输入框逐字打出示例问题 → 回答气泡逐字展开(scrub,句子打一半显而易见未完,不违参赛铁律)；
+   用户点框接管：演示停止,回车后按时间打出针对其问题的估算(数字唯一值→时间驱动)。 */
+(function heroChat(){
+  const track=document.getElementById('hero-track'); if(!track) return;
+  const input=document.getElementById('heroInput'),send=document.getElementById('heroSend');
+  const ans=document.getElementById('heroAns'),ansT=document.getElementById('heroAnsText'),cur=document.getElementById('heroCur');
+  const MICRO=0.3;   // 微波炉转 1 秒 ≈ 0.3 Wh
+  const classify=t=>/视频|短片|影片/.test(t)?'video':/图片|图像|画一|插画|海报|配图|生成图|一张图/.test(t)?'image':/邮件|文章|作文|文案|报告|信|稿|总结|翻译|写/.test(t)?'text':'simple';
+  const fmtWh=v=>v<10?(Math.round(v*100)/100)+'':Math.round(v).toLocaleString();
+  const fmtT=s=>s<90?Math.max(1,Math.round(s))+' 秒':((s/60)<10?(s/60).toFixed(1):Math.round(s/60))+' 分钟';
+  function reply(t){
+    const k=classify(t),base={simple:{wh:0.3,ml:10},text:{wh:0.45,ml:519},image:{wh:1.5,ml:23},video:{wh:380,ml:1200}}[k];
+    const f=Math.min(1.6,1+Math.max(0,t.length-15)/120),wh=base.wh*f,ml=Math.round(base.ml*f);
+    if(k==='video')return '你要的这段视频，代价大得多：约 '+fmtWh(wh)+' 瓦时电，相当于让微波炉转 '+fmtT(wh/MICRO)+'——可以是一次简单问答的成百上千倍。（估算值）\n\n往下滑，看看这些"微不足道"加起来是什么。';
+    if(k==='image')return '生成这张图，大约要消耗 '+fmtWh(wh)+' 瓦时电——相当于微波炉转 '+fmtT(wh/MICRO)+'，再蒸发约 '+ml+' 毫升冷却水。（估算值）\n\n而这只是开始。往下滑。';
+    const water=ml>=100?('，再用掉约 '+ml+' 毫升水来冷却——差不多一瓶矿泉水'):'，顺带蒸发一小口冷却水';
+    return '回答这句话，我大约要消耗 '+fmtWh(wh)+' 瓦时的电——相当于让一台微波炉转 '+fmtT(wh/MICRO)+water+'。（估算值）\n\n听起来微不足道？把它乘以全世界每天约 25 亿次提问——往下滑，我带你看。';
+  }
+  const DEMO_Q='帮我写一封一百字的邮件',DEMO_A=reply(DEMO_Q);
+  let manual=false,timer=null;
+  function typeOut(str){ if(timer)clearTimeout(timer);
+    ans.hidden=false;cur.style.display='';ansT.textContent='';let i=0;
+    (function step(){ if(i<str.length){ ansT.textContent+=str[i++]; timer=setTimeout(step,/[，。、—…\n？！]/.test(str[i-1])?85:20); } else cur.style.display='none'; })(); }
+  function ask(){ const q=input.value.trim(); if(!q)return; manual=true; typeOut(reply(q)); }
+  if(send)send.addEventListener('click',ask);
+  input.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); ask(); } });
+  input.addEventListener('focus',()=>{ if(!manual){ manual=true; input.value=''; ans.hidden=true; } });
+  input.addEventListener('blur',()=>{ if(manual&&input.value.trim()===''&&ansT.textContent===''){ manual=false; } });   // 没输入就走→恢复演示
+  function frame(){ requestAnimationFrame(frame);
+    if(manual||!vis(track,50)) return;
+    const r=track.getBoundingClientRect();
+    const P=Math.max(0,Math.min(1,-r.top/(track.offsetHeight-innerHeight)));
+    const p1=cl(P/0.22),p2=cl((P-0.3)/0.5);
+    input.value=DEMO_Q.substring(0,Math.floor(DEMO_Q.length*p1));
+    if(p2>0){ ans.hidden=false; ansT.textContent=DEMO_A.substring(0,Math.floor(DEMO_A.length*p2)); cur.style.display=p2>=1?'none':''; }
+    else ans.hidden=true;
+  }
+  frame();
+})();
+
 /* ---------- 通用引擎 ---------- */
 function scene(secId, draws){
   const sec=document.getElementById(secId); if(!sec) return;

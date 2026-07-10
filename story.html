@@ -59,16 +59,30 @@
   .endnote .src a:hover{color:var(--water)}
 </style></head><body>
 
-<!-- ===== 开场 ===== -->
-<section class="hero">
-  <div class="eyebrow">数据新闻 · AI 的环境代价</div>
-  <h1>你问 AI 的那句话，<br>要喝掉一口水</h1>
-  <div class="chatbox">
-    <div class="ph">问点什么…比如「帮我写一封一百字的邮件」</div>
-    <div class="bar"><span class="plus">+</span><span class="flex"></span><span class="model">能耗估算 · 实时</span><span class="send">↑</span></div>
+<!-- ===== 开场：滚动演示打字(MIT typewriter 手法) + 真输入能耗估算 ===== -->
+<section id="herow"><div id="hero-track"><div id="hero-stage">
+  <div class="hero">
+    <div class="eyebrow">数据新闻 · AI 的环境代价</div>
+    <h1>你问 AI 的那句话，<br>要喝掉一口水</h1>
+    <div class="chatbox">
+      <input id="heroInput" type="text" maxlength="60" placeholder="问点什么…比如「帮我写一封一百字的邮件」" autocomplete="off">
+      <div class="bar"><span class="plus">+</span><span class="flex"></span><span class="model">能耗估算 · 试试输入</span><span class="send" id="heroSend">↑</span></div>
+      <div class="ans" id="heroAns" hidden><p id="heroAnsText"></p><span class="cur" id="heroCur">|</span></div>
+    </div>
+    <div class="scrollcue">跟着这一口水往下 ↓</div>
   </div>
-  <div class="scrollcue">跟着这一口水往下 ↓</div>
-</section>
+</div></div></section>
+<style>
+  #hero-track{height:260vh;position:relative}
+  #hero-stage{position:sticky;top:0;height:100vh;overflow:hidden}
+  .chatbox input{width:100%;background:none;border:0;outline:none;color:#e7eef0;font:18px var(--sans);caret-color:#5fb6cf;padding:2px 0 0}
+  .chatbox input::placeholder{color:#5f6a70}
+  .chatbox .ans{margin-top:12px;border-top:1px solid rgba(180,205,215,.12);padding:14px 2px 6px;min-height:150px}
+  .chatbox .ans p{display:inline;font-size:16.5px;line-height:1.78;color:#cdd6da;white-space:pre-wrap}
+  .chatbox .ans .cur{display:inline-block;color:#5fb6cf;animation:blink .9s step-end infinite}
+  .chatbox .ans[hidden]{display:none}
+  @keyframes blink{50%{opacity:0}}
+</style>
 
 <section class="ctrans" data-n="1" data-k="① 取水" data-t="这瓶水从哪来"><canvas></canvas></section>
 <section id="s1w"><div id="s1-track"><div id="s1-stage">
@@ -269,6 +283,9 @@
   html,body{font-size:16px}
   .hero h1{font-size:clamp(25px,7.5vw,38px);margin-bottom:26px}
   .chatbox{max-width:none}
+  .chatbox input{font-size:16px}
+  .chatbox .ans{min-height:180px}
+  .chatbox .ans p{font-size:15px;line-height:1.7}
   /* 文字框：小字号 + 撑宽保持横向长方形 + 减内距 + 上移让出 3D 场景 */
   .box{max-width:none;width:90vw;top:9vh;padding:13px 15px}
   .box p{font-size:14.5px;line-height:1.5}
