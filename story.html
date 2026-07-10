@@ -9,9 +9,10 @@
 <meta property="og:url" content="https://sunnywang666.github.io/AI-to-environment-new/story.html">
 <meta property="og:image" content="https://sunnywang666.github.io/AI-to-environment-new/docs/screenshots/hero-desktop.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fonts/NotoSansSC-sub.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+  /* 自托管子集字体（全站用字+ASCII，可变字重 100-900）；改文案添新字后重跑 _verify/subset.py 再提交 */
+  @font-face{font-family:'Noto Sans SC';src:url('assets/fonts/NotoSansSC-sub.woff2') format('woff2');font-weight:100 900;font-display:swap}
   :root{
     --bg:#1a2632; --ink:#0a0f14; --text:#e7eef0; --dim:#8a969c;
     --water:#5fb6cf; --energy:#d2a24a; --ember:#e0664a; --leaf:#9aab6a;
