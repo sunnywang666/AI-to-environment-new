@@ -15,6 +15,9 @@ function slideBoxes(boxes,P){const Hh=innerHeight,N=boxes.length;
     el.style.transform=`translateX(-50%) translateY(${(1-tin)*Hh*0.98+tout*(-Hh*1.15)}px)`;});}
 // 视口守卫：元素离视口太远就不渲染——同一时刻只画在看的那一章，避免十几个 rAF 同时烧 GPU 拖垮滚动
 function vis(el,m){if(!el)return true;const r=el.getBoundingClientRect();return r.bottom>-(m||0)&&r.top<innerHeight+(m||0);}
+// 触发式计数（参赛规范）：唯一终值的读数不绑滚动——滚动只负责触发，动画按时间播到真值并定格；
+// 停在半路看到的要么是播放中、要么是定格真值，绝不会是错的数。只有时间序列(进度=年份)和纯氛围动画才 scrub。
+function trigProg(st,on,durSec){ if(on&&st.p<1) st.p=Math.min(1,st.p+1/(60*durSec)); return st.p; }
 
 /* ---------- 通用引擎 ---------- */
 function scene(secId, draws){
@@ -223,6 +226,7 @@ function trend(pts,ydom,color,big,sub){return (ctx,p,prog,alpha,dy)=>layer(ctx,a
   ScrollTrigger.create({trigger:sec,start:"top top",end:"+="+(boxes.length*3400),pin:true,scrub:true,onUpdate:s=>P=s.progress});
   const drawPrice=price(),drawDots=dots(166,90,C.energy,"每格 1 吉瓦 · 亮起的是数据中心新增用电，约占新增的一半");
   const DBG=new URLSearchParams(location.search).get('dbgp');
+  const trigDots={p:0};   // 90/166吉瓦=唯一真值→触发式；电价曲线=时间序列保留scrub
   function frame(){requestAnimationFrame(frame);
     if(DBG!==null)P=parseFloat(DBG);
     else if(!vis(sec,300))return;
@@ -232,7 +236,7 @@ function trend(pts,ydom,color,big,sub){return (ctx,p,prog,alpha,dy)=>layer(ctx,a
     const priceOut=sm(cl((P-0.58)/0.06));  // 曲线先完全退场（0.64 前清空）
     const dotsIn=sm(cl((P-0.655)/0.06));   // 点阵 0.655 才进场：中间留空档，两图绝不同屏叠影
     if(priceOut<1) drawPrice(ctx,p,curveP,1-priceOut,0);
-    if(dotsIn>0) drawDots(ctx,p,sm(cl((P-0.68)/0.28)),dotsIn,(1-dotsIn)*30);
+    if(dotsIn>0) drawDots(ctx,p,sm(trigProg(trigDots,dotsIn>0.5,2)),dotsIn,(1-dotsIn)*30);
     slideBoxes(boxes,P);
   }
   frame();
@@ -328,11 +332,11 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const vroot=document.getElementById('s1-track');
   const TOTAL=290;
   const wavy=p=>{p=cl(p);return cl(p-0.07*Math.sin(p*Math.PI*3));};   // 单调递增但斜率起伏→抽水有快慢
-  let prevDr=0,flowStr=0;
+  let prevDr=0,flowStr=0;const trigS1={p:0};   // 290亿升=唯一真值,触发后按时间播完
   function animate(){requestAnimationFrame(animate);
     if(!vis(vroot,300))return;
-    // 抽干波（front 速度非匀速→看得出快慢）
-    const front=wavy(P)*1.4;
+    // 抽干波（front 速度非匀速→看得出快慢）；进度=时间不=滚动，播完定格在 290
+    const front=wavy(trigProg(trigS1,P>0.02,5))*1.4;
     let rem=0;
     for(const c of cols){const cp=sm(cl((front-c.delay)/0.28));
       const h=lerp(baseH,0.05,cp);c.m.scale.y=h;c.m.position.y=h/2;
@@ -419,7 +423,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     {v:"7.4 万公顷",c:"var(--water)",u:"2021 台湾大旱被停灌的农田 · 水优先供给芯片工厂"}
   ];
   const hudEl=document.getElementById('s4-hud'),vEl=document.getElementById('s4-v'),uEl=document.getElementById('s4-u');
-  let hudIdx=-1;
+  let hudIdx=-1;const trigUnits={p:0},trigBars={p:0};   // 234台/碳强度柱=唯一真值→触发式；趋势线=时间序列保留scrub
 
   let P=0,N=7;ScrollTrigger.create({trigger:"#s4-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const cbs=[...stage.querySelectorAll('.cbox')];
@@ -436,15 +440,15 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
       spos[i*3+1]+=0.052*(0.4+on);spos[i*3]+=sox[i]*0.012;spos[i*3+2]+=soz[i]*0.004;
       if(spos[i*3+1]>14)seedSmoke(i);}
     sg.attributes.position.needsUpdate=true;
-    // 柴油阵列在空气段（块 1）逐台亮起
-    const litF=sm(cl((P-0.10)/0.16)),litN=Math.round(NU*litF);
+    // 柴油阵列在空气段（块 1）逐台亮起（触发式，播完定格 234 台）
+    const litF=sm(trigProg(trigUnits,P>0.10,2)),litN=Math.round(NU*litF);
     for(let i=0;i<NU;i++){const e=i<litN?0.55:0.2;if(Math.abs(units[i].material.emissiveIntensity-e)>0.01)units[i].material.emissiveIntensity=e;}
 
     // 2D overlay：碳强度柱（块3）/ 碳排趋势（块4），并在其后铺暗幕让 3D 退后
     x2.clearRect(0,0,CW,CH);
     const g=Math.max(54,Math.min(96,CW*0.07)),pp={l:g+34,r:CW-g,t:CH*0.40,b:CH*0.86,W:CW,H:CH};
     const seg=1/N;
-    const ua=cl((P-3*seg)/seg),a3i=sm(cl((ua-0.12)/0.12)),a3o=sm(cl((ua-0.84)/0.16)),al3=a3i*(1-a3o),pr3=sm(cl((ua-0.18)/0.48));
+    const ua=cl((P-3*seg)/seg),a3i=sm(cl((ua-0.12)/0.12)),a3o=sm(cl((ua-0.84)/0.16)),al3=a3i*(1-a3o),pr3=sm(trigProg(trigBars,al3>0.01,1.4));
     const ub=cl((P-4*seg)/seg),a4i=sm(cl((ub-0.12)/0.12)),a4o=sm(cl((ub-0.84)/0.16)),al4=a4i*(1-a4o),pr4=sm(cl((ub-0.18)/0.48));
     const veil=Math.max(al3,al4);
     if(veil>0.01){x2.save();x2.globalAlpha=veil*0.82;x2.fillStyle="#16222c";x2.fillRect(0,0,CW,CH);x2.restore();}
@@ -562,7 +566,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     return C_WIDE;
   }
 
-  let fr=0;
+  let fr=0;const trigCnt={p:0};   // 25亿次/天=唯一真值→触发式；束流的分步显现是叙事氛围保留scrub
   // 渐进：前沿=amt；t<amt 的粒子显示（流从源头长到目标），其余藏起来
   function setStream(s,amt){ s.pts.material.opacity=amt>0.02?0.92:0; const adv=0.005+amt*0.012;
     for(let i=0;i<s.t.length;i++){ s.t[i]+=adv; if(s.t[i]>1)s.t[i]-=1; const k=s.t[i];
@@ -597,7 +601,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     loopLine.material.opacity=S.loop*0.85; arrows.forEach(a=>a.material.opacity=S.loop); loopPart.material.opacity=S.loop*0.95;
     for(let i=0;i<NL;i++){ lt[i]+=0.006; if(lt[i]>1)lt[i]-=1; const v=loopCurve.getPoint(lt[i]); lpos[i*3]=v.x;lpos[i*3+1]=v.y;lpos[i*3+2]=v.z; }
     lg.attributes.position.needsUpdate=true; lab('loop',S.loop*wide);
-    if(cntV) cntV.textContent=Math.round(Math.max(0,Math.min(1,P/0.78))*25);
+    if(cntV) cntV.textContent=Math.round(sm(trigProg(trigCnt,P>0.02,4))*25);
     slideBoxes(cbs,P);
     rdr.render(sc,cam);
   }
@@ -666,10 +670,10 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const lab=(k,v)=>{ if(labels[k]) labels[k].style.opacity=v; };
   const DBG=new URLSearchParams(location.search).get('dbgp');
 
-  let fr=0, P=0;
+  let fr=0, P=0;const trigFill={p:0};   // 0.32→519=两个真值间的灌注，触发式播完定格
   function tick(){requestAnimationFrame(tick); fr++;
     if(DBG!==null){P=parseFloat(DBG);} else {const r=vroot.getBoundingClientRect(); P=Math.max(0,Math.min(1,-r.top/(vroot.offsetHeight-innerHeight)));}
-    const sFill=sm(cl((P-0.18)/0.16));   // box1 灌满
+    const sFill=sm(trigProg(trigFill,P>0.18,3));   // box1 触发灌满
     const sElec=sm(cl((P-0.52)/0.12));   // box2 电表
     const vesShow=1-sm(cl((P-0.44)/0.08));   // 量瓶在切电表前淡出
     const r2=vroot.getBoundingClientRect(); if(DBG===null && (r2.bottom<-50||r2.top>innerHeight+50)) return;
@@ -779,7 +783,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const tempV=document.getElementById('chip-temp'),waterV=document.getElementById('chip-water');
   const cbs=[...document.querySelectorAll('#chip-stage .cbox')];
   const vroot=document.getElementById('chip-track');
-  let T=0;function animate(){requestAnimationFrame(animate);T++;
+  let T=0;const trigChipW={p:0};function animate(){requestAnimationFrame(animate);T++;
     if(!vis(vroot,300))return;
     grp.rotation.y=Math.sin(P*0.6)*0.05;
     const camP=sm(cl((P-0.74)/0.26)),r=lerp(13,30,camP),hgt=lerp(7.5,22,camP),ang=lerp(0,0.5,camP);
@@ -789,7 +793,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     const coolG=sm(cl((P-0.48)/0.22))*(1-sm(cl((P-0.82)/0.18)));steam.material.opacity=coolG*0.5;
     const pos=steam.geometry.attributes.position.array;for(let i=0;i<ST;i++){pos[i*3+1]+=svel[i]*(0.4+coolG);if(pos[i*3+1]>7)pos[i*3+1]=0;}steam.geometry.attributes.position.needsUpdate=true;
     const temp=Math.round(lerp(22,86,sm(cl((P-0.14)/0.34)))-lerp(0,18,sm(cl((P-0.5)/0.3))));tempV.textContent=temp;
-    waterV.textContent=Math.round(sm(cl((P-0.46)/0.4))*519);slideBoxes(cbs,P);
+    waterV.textContent=Math.round(sm(trigProg(trigChipW,P>0.46,2.5))*519);slideBoxes(cbs,P);
     rdr.render(sc,cam);}
   animate();
   addEventListener('resize',()=>{cam.aspect=W()/H();fitFov(cam);rdr.setSize(W(),H());});
