@@ -487,11 +487,11 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const smoke=new THREE.Points(sg,new THREE.PointsMaterial({color:0xb08a6a,size:(.32)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(smoke);
 
   // 74 块立体农田（块6 换景：厂区沉下地平线，田块斜透视铺开；每格=1,000 公顷，停灌逐块变旱黄）
-  const FN=74,fCols=10,farm=new THREE.Group();farm.position.set(-0.9,0,-0.6);farm.scale.setScalar(1.45);farm.rotation.y=0.55;sc.add(farm);   // 斜置≈1/3菱形感,尖角朝上下左右但不对正
+  const FN=74,fCols=10,fRows=Math.ceil(FN/fCols),farm=new THREE.Group();farm.position.set(0,0,3.4);farm.scale.setScalar(1.45);farm.rotation.y=0.55;sc.add(farm);   // 斜置≈1/3菱形感；tiles 以阵心为原点→旋转/缩放锁定视线中心
   const fGeo=new THREE.BoxGeometry(0.88,0.08,0.88),fEdgeGeo=new THREE.EdgesGeometry(fGeo);
   const tiles=[];for(let i=0;i<FN;i++){const c=i%fCols,r=Math.floor(i/fCols);
     const mat=new THREE.MeshStandardMaterial({color:0x2f5a44,emissive:0x1e4432,emissiveIntensity:.5,metalness:.15,roughness:.7,transparent:true,opacity:0});
-    const m=new THREE.Mesh(fGeo,mat);m.position.set((c-(fCols-1)/2)*1.02,0.04,r*0.98);
+    const m=new THREE.Mesh(fGeo,mat);m.position.set((c-(fCols-1)/2)*1.02,0.04,(r-(fRows-1)/2)*0.98);
     const el=new THREE.LineSegments(fEdgeGeo,new THREE.LineBasicMaterial({color:0x8fd6a8,transparent:true,opacity:0}));m.add(el);
     farm.add(m);tiles.push({mat,el});}
 
