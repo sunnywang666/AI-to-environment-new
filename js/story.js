@@ -31,13 +31,13 @@ function trigProg(st,on,durSec){ if(on&&st.p<1) st.p=Math.min(1,st.p+1/(60*durSe
   const fmtT=s=>s<90?Math.max(1,Math.round(s))+' 秒':((s/60)<10?(s/60).toFixed(1):Math.round(s/60))+' 分钟';
   function reply(t){
     const k=classify(t),base={simple:{wh:0.3,ml:10},text:{wh:0.45,ml:519},image:{wh:1.5,ml:23},video:{wh:380,ml:1200}}[k];
-    const f=Math.min(1.6,1+Math.max(0,t.length-15)/120),wh=base.wh*f,ml=Math.round(base.ml*f);
+    const f=Math.min(1.6,1+Math.max(0,t.length-20)/120),wh=base.wh*f,ml=Math.round(base.ml*f);
     if(k==='video')return '你要的这段视频，代价大得多：约 '+fmtWh(wh)+' 瓦时电，相当于让微波炉转 '+fmtT(wh/MICRO)+'——可以是一次简单问答的成百上千倍。（估算值）\n\n往下滑，看看这些"微不足道"加起来是什么。';
     if(k==='image')return '生成这张图，大约要消耗 '+fmtWh(wh)+' 瓦时电——相当于微波炉转 '+fmtT(wh/MICRO)+'，再蒸发约 '+ml+' 毫升冷却水。（估算值）\n\n而这只是开始。往下滑。';
     const water=ml>=100?('，再用掉约 '+ml+' 毫升水来冷却——差不多一瓶矿泉水'):'，顺带蒸发一小口冷却水';
     return '回答这句话，我大约要消耗 '+fmtWh(wh)+' 瓦时的电——相当于让一台微波炉转 '+fmtT(wh/MICRO)+water+'。（估算值）\n\n听起来微不足道？把它乘以全世界每天约 25 亿次提问——往下滑，我带你看。';
   }
-  const DEMO_Q='帮我写一封一百字的邮件',DEMO_A=reply(DEMO_Q);
+  const DEMO_Q='帮我写一封 100 字的请假邮件',DEMO_A=reply(DEMO_Q);
   const thread=document.getElementById('heroThread'),chips=document.getElementById('heroChips');
   let manual=false,used=false,timer=null,demoU=null,demoA=null;
   function bubble(cls,txt){ const d=document.createElement('div'); d.className='msg '+cls; d.textContent=txt; thread.appendChild(d); thread.scrollTop=thread.scrollHeight; return d; }

@@ -65,16 +65,16 @@
     <div class="eyebrow">数据新闻 · AI 的环境代价</div>
     <h1>你问 AI 的那句话，<br>要喝掉一口水</h1>
     <div class="chatwrap">
-      <div class="thread" id="heroThread"></div>
       <div class="chatbox">
         <input id="heroInput" type="text" maxlength="60" placeholder="问点什么…或点下面的预设提问" autocomplete="off">
         <div class="bar"><span class="plus">+</span><span class="flex"></span><span class="model">能耗估算</span><span class="send" id="heroSend">↑</span></div>
       </div>
       <div class="chips" id="heroChips">
-        <button data-q="帮我写一封一百字的邮件">帮我写一封一百字的邮件</button>
-        <button data-q="画一张生日贺卡插画">画一张生日贺卡插画</button>
-        <button data-q="生成一段 10 秒的短视频">生成一段 10 秒的短视频</button>
+        <button data-q="帮我写一封 100 字的请假邮件">帮我写一封 100 字的请假邮件</button>
+        <button data-q="画一张生日贺卡插画：粉色气球">画一张生日贺卡插画：粉色气球</button>
+        <button data-q="生成一段 10 秒的小猫追蝴蝶短视频">生成一段 10 秒的小猫追蝴蝶短视频</button>
       </div>
+      <div class="thread" id="heroThread"></div>
     </div>
     <div class="scrollcue">跟着这一口水往下 ↓</div>
   </div>
@@ -84,9 +84,9 @@
   #hero-stage{position:sticky;top:0;height:100vh;overflow:hidden}
   .chatbox input{width:100%;background:none;border:0;outline:none;color:#e7eef0;font:18px var(--sans);caret-color:#5fb6cf;padding:2px 0 0}
   .chatbox input::placeholder{color:#5f6a70}
-  /* 对话流(message thread)：气泡贴着输入框从下往上堆，独立于输入区 */
+  /* 对话流(message thread)：在输入区下方、从上往下生长——发送后用户消息+AI 回答向下展开 */
   .chatwrap{width:100%;max-width:600px;display:flex;flex-direction:column;gap:10px}
-  .thread{height:236px;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;overflow-y:auto;padding:4px 2px;scrollbar-width:none}
+  .thread{height:236px;display:flex;flex-direction:column;justify-content:flex-start;gap:10px;overflow-y:auto;padding:4px 2px;scrollbar-width:none}
   .thread::-webkit-scrollbar{display:none}
   .msg{max-width:86%;padding:10px 15px;border-radius:15px;font-size:15.5px;line-height:1.75;text-align:left;white-space:pre-wrap}
   .msg.user{align-self:flex-end;background:#27414f;color:#e7eef0;border-bottom-right-radius:4px}
