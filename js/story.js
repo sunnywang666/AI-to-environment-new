@@ -487,7 +487,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const smoke=new THREE.Points(sg,new THREE.PointsMaterial({color:0xb08a6a,size:(.32)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(smoke);
 
   // 74 块立体农田（块6 换景：厂区沉下地平线，田块斜透视铺开；每格=1,000 公顷，停灌逐块变旱黄）
-  const FN=74,fCols=10,farm=new THREE.Group();farm.position.set(0,0,-0.6);farm.scale.setScalar(1.35);sc.add(farm);
+  const FN=74,fCols=10,farm=new THREE.Group();farm.position.set(-0.9,0,-0.6);farm.scale.setScalar(1.45);farm.rotation.y=0.55;sc.add(farm);   // 斜置≈1/3菱形感,尖角朝上下左右但不对正
   const fGeo=new THREE.BoxGeometry(0.88,0.08,0.88),fEdgeGeo=new THREE.EdgesGeometry(fGeo);
   const tiles=[];for(let i=0;i<FN;i++){const c=i%fCols,r=Math.floor(i/fCols);
     const mat=new THREE.MeshStandardMaterial({color:0x2f5a44,emissive:0x1e4432,emissiveIntensity:.5,metalness:.15,roughness:.7,transparent:true,opacity:0});
@@ -524,7 +524,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     const camP=sm(cl(P/0.55)),r=lerp(11,21,camP),hgt=lerp(4.5,9,camP);
     const a6cam=sm(cl((cl((P-6/7)/(1/7))-0.12)/0.12));
     let px=Math.sin(0.42)*r,py=hgt,pz=Math.cos(0.42)*r,ly=lerp(3.6,2.2,camP),lz=0.6;
-    if(a6cam>0){ px=lerp(px,0.4,a6cam); py=lerp(py,10.4,a6cam); pz=lerp(pz,17.4,a6cam); ly=lerp(ly,0.3,a6cam); lz=lerp(lz,3.8,a6cam); }
+    if(a6cam>0){ px=lerp(px,0.4,a6cam); py=lerp(py,11.2,a6cam); pz=lerp(pz,18.4,a6cam); ly=lerp(ly,0.3,a6cam); lz=lerp(lz,3.8,a6cam); }
     cam.position.set(px,py,pz);cam.lookAt(0,ly,lz);
     // 烟越冒越浓
     const on=sm(cl((P-0.04)/0.6));smoke.material.opacity=on*0.52;
