@@ -10,3 +10,6 @@ Thumbs.db
 *.pdf
 poster/export/
 poster/*.jpg
+
+# 用户真机反馈截图(本地参考,不入库)
+修复移动端/

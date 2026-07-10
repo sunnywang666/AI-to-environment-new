@@ -32,9 +32,9 @@ All figures are cited in the endnote of the story; discrepancies between sources
 ## 结构 / Structure
 
 ```
-story.html      正文（唯一入口，index.html 自动跳转）
+story.html      正文（唯一入口，index.html 自动跳转；样式全部内联）
 js/story.js     渲染引擎与全部场景
-css/ data/      样式与地理底图
+data/           地理底图（海报用）
 drafts/         开发过程中的单图原型（非成品）
 poster/         同题 80x200cm 海报的生产文件
 ```
