@@ -199,17 +199,20 @@ function unitChart(total,color,big,sub){return (ctx,p,prog,alpha,dy)=>layer(ctx,
   ctx.textAlign="left";ctx.textBaseline="top";ctx.fillStyle=color;ctx.font=FNT(bf,700);ctx.fillText(big,p.l,p.t);
   ctx.fillStyle=C.dim;ctx.font=FNT(15);ctx.fillText(sub,p.l+4,p.t+bf+6);
 });}
-// 趋势线（有时间变化才用）：读数 +73% 标准
-function trend(pts,ydom,color,big,sub){return (ctx,p,prog,alpha,dy)=>layer(ctx,alpha,dy,()=>{
+// 趋势线（有时间变化才用）：读数 +73% 标准；dash=true 整条画虚线（预测值，与实测实线区分）
+function trend(pts,ydom,color,big,sub,dash){return (ctx,p,prog,alpha,dy)=>layer(ctx,alpha,dy,()=>{
   const x0=pts[0][0],x1=pts[pts.length-1][0],t=p.t+96;
   const xOf=v=>lerp(p.l,p.r,(v-x0)/(x1-x0)),yOf=v=>lerp(p.b,t,(v-ydom[0])/(ydom[1]-ydom[0]));
   ctx.strokeStyle=C.grid;ctx.lineWidth=1;for(let k=0;k<=4;k++){const yy=lerp(p.b,t,k/4);ctx.beginPath();ctx.moveTo(p.l,yy);ctx.lineTo(p.r,yy);ctx.stroke();}
   ctx.fillStyle=C.dim;ctx.font=FNT(14);ctx.textAlign="center";ctx.textBaseline="top";for(const pt of pts)ctx.fillText(pt[0],xOf(pt[0]),p.b+8);
-  ctx.lineCap="round";ctx.lineJoin="round";ctx.shadowColor=color;ctx.shadowBlur=14;ctx.strokeStyle=color;ctx.lineWidth=3;ctx.beginPath();
+  ctx.lineCap="round";ctx.lineJoin="round";ctx.shadowColor=color;ctx.shadowBlur=14;ctx.strokeStyle=color;ctx.lineWidth=3;
+  if(dash)ctx.setLineDash([9,9]);ctx.beginPath();
   const N=80;for(let i=0;i<=N;i++){const f=i/N*prog,xx=lerp(x0,x1,f);let j=0;while(j<pts.length-1&&pts[j+1][0]<xx)j++;
     const a=pts[j],bb=pts[Math.min(j+1,pts.length-1)],ff=bb[0]===a[0]?0:(xx-a[0])/(bb[0]-a[0]),yv=lerp(a[1],bb[1],ff);
     i===0?ctx.moveTo(xOf(xx),yOf(yv)):ctx.lineTo(xOf(xx),yOf(yv));}
-  ctx.stroke();ctx.shadowBlur=0;const bf=Math.max(50,Math.min(78,p.W*0.052));
+  ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=color;ctx.beginPath();ctx.arc(xOf(x0),yOf(pts[0][1]),4.5,0,7);ctx.fill();   // 实测起点实心锚
+  ctx.shadowBlur=0;const bf=Math.max(50,Math.min(78,p.W*0.052));
   ctx.textAlign="left";ctx.textBaseline="top";ctx.fillStyle=color;ctx.font=FNT(bf,700);ctx.fillText(big,p.l,p.t);
   ctx.fillStyle=C.dim;ctx.font=FNT(15);wrap(ctx,sub,p.l+4,p.t+bf+6,p.r-p.l-8,20);   // 窄屏换行防右裁
 });}
@@ -327,7 +330,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const flow=new THREE.Points(fg,new THREE.PointsMaterial({color:0x9fe0ee,size:(.18)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(flow);
 
   let P=0;ScrollTrigger.create({trigger:"#s1-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
-  const bigV=document.getElementById('s1-drained'),subV=document.querySelector('#s1-hud .u');
+  const bigV=document.getElementById('s1-drained');
   const cbs=[...stage.querySelectorAll('.cbox')];
   const vroot=document.getElementById('s1-track');
   const TOTAL=290;
@@ -360,7 +363,6 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     cam.position.set(Math.sin(0.32)*r,hgt,Math.cos(0.32)*r);cam.lookAt(-1.2,2.2,0.6);
     field.rotation.y=Math.sin(P*0.5)*0.02;
     bigV.textContent=Math.round(drained);
-    if(subV)subV.textContent="亿升已被抽进数据中心 · 水源仅剩 "+Math.round(TOTAL-drained)+" 亿升";
     slideBoxes(cbs,P);rdr.render(sc,cam);}
   animate();
   addEventListener('resize',()=>{cam.aspect=W()/H();fitFov(cam);rdr.setSize(W(),H());});
@@ -411,7 +413,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   function rz2(){CW=innerWidth;CH=innerHeight;cv2.width=CW*DPR;cv2.height=CH*DPR;x2.setTransform(DPR,0,0,DPR,0,0);}
   rz2();addEventListener('resize',rz2);
   const drawBars=bars([{n:"挪威",v:25},{n:"法国",v:40},{n:"德国",v:336},{n:"美国",v:386},{n:"中国",v:555},{n:"印度",v:705},{n:"波兰",v:716}],["挪威","波兰"],C.leaf);
-  const drawTrend=trend([[2024,1.8],[2027,2.8],[2030,4.0]],[0,4.5],C.leaf,"4 亿吨","数据中心相关碳排：2024 → 2030 翻倍多（亿吨二氧化碳）");
+  const drawTrend=trend([[2024,1.8],[2027,2.8],[2030,4.0]],[0,4.5],C.leaf,"4 亿吨","数据中心相关碳排：2024 实测 → 2030 预测（亿吨二氧化碳，虚线为 IEA 预测值）",true);
 
   // 逐块 HUD 文案（图表块 3/4 不显示读数，交给图表自身大数字）
   const HUD=[
@@ -643,7 +645,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const mTex=new THREE.CanvasTexture(mC); mTex.anisotropy=8;
   const meter=new THREE.Mesh(new THREE.PlaneGeometry(10,7.42),new THREE.MeshBasicMaterial({map:mTex,transparent:true,depthWrite:false}));
   meter.position.set(0,2.3,0); meter.material.opacity=0; sc.add(meter);
-  const SRC=[[415,'IEA'],[448,'UNU'],[485,'IEA']];
+  const SRC=[[415,'IEA·2024实测'],[448,'UNU·2025'],[485,'IEA·2025估算']];
   const ang=v=>Math.PI - (v-400)/100*Math.PI;
   function drawMeter(val,op){
     const x=mX, cx=310, cy=330, R=206;
@@ -653,7 +655,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     x.lineWidth=11; x.strokeStyle='rgba(120,140,150,.22)'; x.beginPath(); x.arc(cx,cy,R,Math.PI,0); x.stroke();
     x.strokeStyle='rgba(180,200,210,.32)'; x.lineWidth=2;
     for(let v=400;v<=500;v+=10){const a=ang(v); x.beginPath(); x.moveTo(cx+Math.cos(a)*(R-13),cy-Math.sin(a)*(R-13)); x.lineTo(cx+Math.cos(a)*(R+2),cy-Math.sin(a)*(R+2)); x.stroke();}
-    SRC.forEach(s=>{const a=ang(s[0]); x.strokeStyle='#d2a24a'; x.lineWidth=4; x.beginPath(); x.moveTo(cx+Math.cos(a)*(R-17),cy-Math.sin(a)*(R-17)); x.lineTo(cx+Math.cos(a)*(R+11),cy-Math.sin(a)*(R+11)); x.stroke(); x.fillStyle='#d2a24a'; x.font="bold 23px 'Roboto Mono',monospace"; x.fillText(s[0], cx+Math.cos(a)*(R+40), cy-Math.sin(a)*(R+40)+7); x.fillStyle='#8a969c'; x.font="13px 'Noto Sans SC',sans-serif"; x.fillText(s[1], cx+Math.cos(a)*(R+40), cy-Math.sin(a)*(R+40)+26);});
+    SRC.forEach(s=>{const a=ang(s[0]); x.strokeStyle='#d2a24a'; x.lineWidth=4; x.beginPath(); x.moveTo(cx+Math.cos(a)*(R-17),cy-Math.sin(a)*(R-17)); x.lineTo(cx+Math.cos(a)*(R+11),cy-Math.sin(a)*(R+11)); x.stroke(); x.fillStyle='#d2a24a'; x.font="bold 23px 'Roboto Mono',monospace"; x.fillText(s[0], cx+Math.cos(a)*(R+62), cy-Math.sin(a)*(R+62)+7); x.fillStyle='#8a969c'; x.font="13px 'Noto Sans SC',sans-serif"; x.fillText(s[1], cx+Math.cos(a)*(R+62), cy-Math.sin(a)*(R+62)+26);});
     const a=ang(val); x.strokeStyle='#eab873'; x.lineWidth=6; x.lineCap='round'; x.beginPath(); x.moveTo(cx,cy); x.lineTo(cx+Math.cos(a)*(R-30),cy-Math.sin(a)*(R-30)); x.stroke();
     x.fillStyle='#eab873'; x.beginPath(); x.arc(cx,cy,11,0,7); x.fill();
     x.fillStyle='#fff'; x.font="bold 48px 'Roboto Mono',monospace"; x.fillText(Math.round(val),cx,cy+56);
