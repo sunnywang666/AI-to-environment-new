@@ -25,7 +25,6 @@ function trigProg(st,on,durSec){ if(on&&st.p<1) st.p=Math.min(1,st.p+1/(60*durSe
 (function heroChat(){
   const track=document.getElementById('hero-track'); if(!track) return;
   const input=document.getElementById('heroInput'),send=document.getElementById('heroSend');
-  const ans=document.getElementById('heroAns'),ansT=document.getElementById('heroAnsText'),cur=document.getElementById('heroCur');
   const MICRO=0.3;   // 微波炉转 1 秒 ≈ 0.3 Wh
   const classify=t=>/视频|短片|影片/.test(t)?'video':/图片|图像|画一|插画|海报|配图|生成图|一张图/.test(t)?'image':/邮件|文章|作文|文案|报告|信|稿|总结|翻译|写/.test(t)?'text':'simple';
   const fmtWh=v=>v<10?(Math.round(v*100)/100)+'':Math.round(v).toLocaleString();
@@ -39,23 +38,35 @@ function trigProg(st,on,durSec){ if(on&&st.p<1) st.p=Math.min(1,st.p+1/(60*durSe
     return '回答这句话，我大约要消耗 '+fmtWh(wh)+' 瓦时的电——相当于让一台微波炉转 '+fmtT(wh/MICRO)+water+'。（估算值）\n\n听起来微不足道？把它乘以全世界每天约 25 亿次提问——往下滑，我带你看。';
   }
   const DEMO_Q='帮我写一封一百字的邮件',DEMO_A=reply(DEMO_Q);
-  let manual=false,timer=null;
-  function typeOut(str){ if(timer)clearTimeout(timer);
-    ans.hidden=false;cur.style.display='';ansT.textContent='';let i=0;
-    (function step(){ if(i<str.length){ ansT.textContent+=str[i++]; timer=setTimeout(step,/[，。、—…\n？！]/.test(str[i-1])?85:20); } else cur.style.display='none'; })(); }
-  function ask(){ const q=input.value.trim(); if(!q)return; manual=true; typeOut(reply(q)); }
-  if(send)send.addEventListener('click',ask);
+  const thread=document.getElementById('heroThread'),chips=document.getElementById('heroChips');
+  let manual=false,used=false,timer=null,demoU=null,demoA=null;
+  function bubble(cls,txt){ const d=document.createElement('div'); d.className='msg '+cls; d.textContent=txt; thread.appendChild(d); thread.scrollTop=thread.scrollHeight; return d; }
+  function demoClear(){ if(demoU){demoU.remove();demoU=null;} if(demoA){demoA.remove();demoA=null;} }
+  function typeInto(el,str){ if(timer)clearTimeout(timer);
+    const c=document.createElement('span'); c.className='cur'; c.textContent='|'; el.textContent=''; el.appendChild(c); let i=0;
+    (function step(){ if(i<str.length){ c.before(str[i++]); thread.scrollTop=thread.scrollHeight; timer=setTimeout(step,/[，。、—…\n？！]/.test(str[i-1])?85:20); } else c.remove(); })(); }
+  function ask(q){ q=(q||input.value).trim(); if(!q)return;
+    if(!used)demoClear(); used=true; manual=true; input.value='';
+    bubble('user',q); typeInto(bubble('ai',''),reply(q)); }
+  if(send)send.addEventListener('click',()=>ask());
   input.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); ask(); } });
-  input.addEventListener('focus',()=>{ if(!manual){ manual=true; input.value=''; ans.hidden=true; } });
-  input.addEventListener('blur',()=>{ if(manual&&input.value.trim()===''&&ansT.textContent===''){ manual=false; } });   // 没输入就走→恢复演示
+  if(chips)chips.addEventListener('click',e=>{ const b=e.target.closest('button[data-q]'); if(b)ask(b.dataset.q); });
+  input.addEventListener('focus',()=>{ if(!manual){ manual=true; demoClear(); input.value=''; } });
+  input.addEventListener('blur',()=>{ if(manual&&!used&&input.value.trim()===''){ manual=false; } });   // 没输入就走→恢复演示
+  // 滚动演示（scrub·无状态由 P 重建）：输入框打问题 → 发送成用户气泡 → AI 气泡打字
   function frame(){ requestAnimationFrame(frame);
     if(manual||!vis(track,50)) return;
     const r=track.getBoundingClientRect();
     const P=Math.max(0,Math.min(1,-r.top/(track.offsetHeight-innerHeight)));
-    const p1=cl(P/0.22),p2=cl((P-0.3)/0.5);
-    input.value=DEMO_Q.substring(0,Math.floor(DEMO_Q.length*p1));
-    if(p2>0){ ans.hidden=false; ansT.textContent=DEMO_A.substring(0,Math.floor(DEMO_A.length*p2)); cur.style.display=p2>=1?'none':''; }
-    else ans.hidden=true;
+    if(P<0.24){ demoClear(); input.value=DEMO_Q.substring(0,Math.floor(DEMO_Q.length*cl(P/0.20))); }
+    else{ input.value='';
+      if(!demoU)demoU=bubble('user',DEMO_Q);
+      const p2=cl((P-0.30)/0.5);
+      if(p2>0){ if(!demoA)demoA=bubble('ai','');
+        demoA.textContent=DEMO_A.substring(0,Math.floor(DEMO_A.length*p2))+(p2<1?' |':'');
+        thread.scrollTop=thread.scrollHeight; }
+      else if(demoA){ demoA.remove(); demoA=null; }
+    }
   }
   frame();
 })();
