@@ -249,7 +249,29 @@ function unitChart(total,color,big,sub){return (ctx,p,prog,alpha,dy)=>layer(ctx,
     ctx.fillRect(x,y,s,s);}
   ctx.shadowBlur=0;const bf=Math.max(50,Math.min(78,p.W*0.052));
   ctx.textAlign="left";ctx.textBaseline="top";ctx.fillStyle=color;ctx.font=FNT(bf,700);ctx.fillText(big,p.l,p.t);
-  ctx.fillStyle=C.dim;ctx.font=FNT(15);ctx.fillText(sub,p.l+4,p.t+bf+6);
+  ctx.fillStyle=C.dim;ctx.font=FNT(15);wrap(ctx,sub,p.l+4,p.t+bf+6,p.r-p.l-8,20);
+});}
+// 5 座退役燃煤待命（④块5）：5 个电厂符号逐座亮起，宾州那座画一条几乎空的 0.5% 负荷条
+function standby(){return (ctx,p,prog,alpha,dy)=>layer(ctx,alpha,dy,()=>{
+  const n=5,y0=p.t+110,availW=p.r-p.l,cw=availW/n,bw=Math.min(cw*0.6,140),bh=Math.min(96,(p.b-y0)*0.34);
+  for(let i=0;i<n;i++){
+    const on=sm(cl((prog-i*0.13)/0.22)); if(on<=0)continue;
+    const x=p.l+i*cw+(cw-bw)/2, y=y0+34;
+    ctx.save(); ctx.globalAlpha*=on;
+    ctx.strokeStyle=C.energy; ctx.lineWidth=1.6; ctx.shadowColor=C.energy; ctx.shadowBlur=10;
+    ctx.strokeRect(x,y,bw,bh);                                        // 厂房
+    ctx.beginPath(); ctx.moveTo(x+bw*0.24,y); ctx.lineTo(x+bw*0.24,y-26); ctx.moveTo(x+bw*0.44,y); ctx.lineTo(x+bw*0.44,y-20); ctx.stroke();   // 烟囱
+    ctx.shadowBlur=0;
+    // 负荷条：底部内嵌，全部近乎空——宾州那座亮 0.5% 一丝
+    ctx.strokeStyle="rgba(200,215,225,.25)"; ctx.lineWidth=1; ctx.strokeRect(x+8,y+bh-16,bw-16,8);
+    if(i===1){ ctx.fillStyle=C.ember; ctx.shadowColor=C.ember; ctx.shadowBlur=8; ctx.fillRect(x+8,y+bh-16,Math.max(2,(bw-16)*0.005),8); ctx.shadowBlur=0; }
+    ctx.fillStyle=i===1?C.ember:C.dim; ctx.font=FNT(13); ctx.textAlign="center"; ctx.textBaseline="top";
+    ctx.fillText(i===1?"宾州 · 仅 0.5% 负荷":"待命",x+bw/2,y+bh+10);
+    ctx.restore();
+  }
+  const bf=Math.max(50,Math.min(78,p.W*0.052));
+  ctx.textAlign="left";ctx.textBaseline="top";ctx.fillStyle=C.energy;ctx.font=FNT(bf,700);ctx.fillText("3,240 兆瓦",p.l,p.t);
+  ctx.fillStyle=C.dim;ctx.font=FNT(15);wrap(ctx,"2025 年美国能源部下令保留待命的 5 座退役燃煤电厂 · 待命费用由当地居民电费分摊",p.l+4,p.t+bf+6,p.r-p.l-8,20);
 });}
 // 趋势线（有时间变化才用）：读数 +73% 标准；dash=true 整条画虚线（预测值，与实测实线区分）
 function trend(pts,ydom,color,big,sub,dash){return (ctx,p,prog,alpha,dy)=>layer(ctx,alpha,dy,()=>{
@@ -434,30 +456,44 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const rim=new THREE.DirectionalLight(0xe0a060,0.35);rim.position.set(-6,5,-6);sc.add(rim);
   const grid=new THREE.GridHelper(60,32,0x2a3a40,0x18222a);sc.add(grid);
   const grp=new THREE.Group();sc.add(grp);
-  // 数据中心厂房（带边线，与其它章节一致的科技线框语言）
+  // 统一亮细边线（与⑦同标准：每个建模都描边，暗环境里也认得出轮廓）
+  const EDGE4=(mesh,color,op)=>{const e=new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry),new THREE.LineBasicMaterial({color:color,transparent:true,opacity:op==null?0.9:op}));mesh.add(e);return e;};
+  // 数据中心厂房
   const hallMat=new THREE.MeshStandardMaterial({color:0x243038,emissive:0x14202a,emissiveIntensity:.32,metalness:.45,roughness:.5});
   const hall=new THREE.Mesh(new THREE.BoxGeometry(6.4,1.7,3.6),hallMat);hall.position.y=0.85;grp.add(hall);
-  hall.add(new THREE.LineSegments(new THREE.EdgesGeometry(hall.geometry),new THREE.LineBasicMaterial({color:0x5fb6cf,transparent:true,opacity:.4})));
+  EDGE4(hall,0x8fdcf0,0.85);
   // 厂房顶散热风扇（小圆盘点缀，体现机房）
-  for(let i=0;i<3;i++){const f=new THREE.Mesh(new THREE.CylinderGeometry(0.34,0.34,0.12,18),new THREE.MeshStandardMaterial({color:0x32434c,emissive:0x16262e,metalness:.6,roughness:.4}));f.position.set((i-1)*1.7,1.74,0.7);grp.add(f);}
+  for(let i=0;i<3;i++){const f=new THREE.Mesh(new THREE.CylinderGeometry(0.34,0.34,0.12,18),new THREE.MeshStandardMaterial({color:0x32434c,emissive:0x16262e,metalness:.6,roughness:.4}));f.position.set((i-1)*1.7,1.74,0.7);grp.add(f);EDGE4(f,0x9fb6c2,0.5);}
   // 3 根烟囱：锥筒身 + 顶部环口（torus）+ 内壁深色，细节更足
   const stMat=new THREE.MeshStandardMaterial({color:0x2c3942,emissive:0x1a2630,emissiveIntensity:.25,metalness:.55,roughness:.5});
   const mouths=[];[-2.1,0,2.1].forEach(x=>{
-    const body=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.46,3.6,20),stMat);body.position.set(x,2.55,-0.7);grp.add(body);
+    const body=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.46,3.6,20),stMat);body.position.set(x,2.55,-0.7);grp.add(body);EDGE4(body,0xeab873,0.75);
     const lip=new THREE.Mesh(new THREE.TorusGeometry(0.34,0.07,10,22),new THREE.MeshStandardMaterial({color:0x3a4a52,emissive:0x20303a,metalness:.6,roughness:.4}));
     lip.rotation.x=Math.PI/2;lip.position.set(x,4.35,-0.7);grp.add(lip);
     mouths.push(new THREE.Vector3(x,4.35,-0.7));
   });
-  // 234 台柴油发电机：26×9 阵列小箱（一证一台），随空气段亮起
+  // 234 台柴油发电机：26×9 阵列小箱（一证一台），随空气段亮起；共享一份边线几何
   const NU=234,uCols=26,ug=new THREE.Group();ug.position.set(0,0,3.2);grp.add(ug);
   const uGeo=new THREE.BoxGeometry(0.26,0.2,0.34),uMat=new THREE.MeshStandardMaterial({color:0x3a3026,emissive:0x2a1c10,emissiveIntensity:.2,metalness:.3,roughness:.6});
+  const uEdgeGeo=new THREE.EdgesGeometry(uGeo);
   const units=[];for(let i=0;i<NU;i++){const c=i%uCols,r=Math.floor(i/uCols);
-    const m=new THREE.Mesh(uGeo,uMat.clone());m.position.set((c-(uCols-1)/2)*0.42,0.1,r*0.46);ug.add(m);units.push(m);}
+    const m=new THREE.Mesh(uGeo,uMat.clone());m.position.set((c-(uCols-1)/2)*0.42,0.1,r*0.46);
+    m.add(new THREE.LineSegments(uEdgeGeo,new THREE.LineBasicMaterial({color:0xd8b48a,transparent:true,opacity:.35})));
+    ug.add(m);units.push(m);}
   // 棕烟粒子：从 3 个烟囱口升腾扩散，越冒越浓
   const NS=620,sg=new THREE.BufferGeometry(),spos=new Float32Array(NS*3),sst=new Float32Array(NS),sox=new Float32Array(NS),soz=new Float32Array(NS);
   function seedSmoke(i){const m=mouths[Math.floor(Math.random()*3)];spos[i*3]=m.x+(Math.random()-.5)*0.3;spos[i*3+1]=m.y+Math.random()*0.4;spos[i*3+2]=m.z+(Math.random()-.5)*0.3;sst[i]=Math.random();sox[i]=(Math.random()-.5);soz[i]=(Math.random()-.5)*0.6;}
   for(let i=0;i<NS;i++)seedSmoke(i);sg.setAttribute('position',new THREE.BufferAttribute(spos,3));
   const smoke=new THREE.Points(sg,new THREE.PointsMaterial({color:0xb08a6a,size:(.32)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(smoke);
+
+  // 74 块立体农田（块6 换景：厂区沉下地平线，田块斜透视铺开；每格=1,000 公顷，停灌逐块变旱黄）
+  const FN=74,fCols=10,farm=new THREE.Group();farm.position.set(0,0,1.6);sc.add(farm);
+  const fGeo=new THREE.BoxGeometry(0.88,0.08,0.88),fEdgeGeo=new THREE.EdgesGeometry(fGeo);
+  const tiles=[];for(let i=0;i<FN;i++){const c=i%fCols,r=Math.floor(i/fCols);
+    const mat=new THREE.MeshStandardMaterial({color:0x2f5a44,emissive:0x1e4432,emissiveIntensity:.5,metalness:.15,roughness:.7,transparent:true,opacity:0});
+    const m=new THREE.Mesh(fGeo,mat);m.position.set((c-(fCols-1)/2)*1.02,0.04,r*0.98);
+    const el=new THREE.LineSegments(fEdgeGeo,new THREE.LineBasicMaterial({color:0x8fd6a8,transparent:true,opacity:0}));m.add(el);
+    farm.add(m);tiles.push({mat,el});}
 
   // 2D 图表 overlay（碳强度柱 / 碳排趋势）
   const cv2=document.getElementById('s4-2d'),x2=cv2.getContext('2d');
@@ -466,18 +502,17 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   rz2();addEventListener('resize',rz2);
   const drawBars=bars([{n:"挪威",v:25},{n:"法国",v:40},{n:"德国",v:336},{n:"美国",v:386},{n:"中国",v:555},{n:"印度",v:705},{n:"波兰",v:716}],["挪威","波兰"],C.leaf);
   const drawTrend=trend([[2024,1.8],[2027,2.8],[2030,4.0]],[0,4.5],C.leaf,"4 亿吨","数据中心相关碳排：2024 实测 → 2030 预测（亿吨二氧化碳，虚线为 IEA 预测值）",true);
+  const drawStandby=standby();
 
-  // 逐块 HUD 文案（图表块 3/4 不显示读数，交给图表自身大数字）
+  // 逐块 HUD 文案（图表块 3/4/5/6 不显示读数，交给图表自身大数字）
   const HUD=[
     null,
     {v:"+79%",c:"var(--ember)",u:"xAI 孟菲斯厂区投运后紧邻 NO₂ 峰值 · 一张许可证就列着 234 台柴油机"},
     {v:"~1300 人",c:"var(--ember)",u:"2030 年数据中心空气污染每年最多致提前死亡 · 约 200 亿美元健康损失"},
-    null,null,
-    {v:"3,240 兆瓦",c:"var(--energy)",u:"2025 年美国能源部下令保留 5 座退役燃煤待命 · 宾州一座仅 0.5% 负荷"},
-    {v:"7.4 万公顷",c:"var(--water)",u:"2021 台湾大旱被停灌的农田 · 水优先供给芯片工厂"}
+    null,null,null,null
   ];
   const hudEl=document.getElementById('s4-hud'),vEl=document.getElementById('s4-v'),uEl=document.getElementById('s4-u');
-  let hudIdx=-1;const trigUnits={p:0},trigBars={p:0};   // 234台/碳强度柱=唯一真值→触发式；趋势线=时间序列保留scrub
+  let hudIdx=-1;const trigUnits={p:0},trigBars={p:0},trigSb={p:0},trigFm={p:0};   // 唯一真值→触发式；趋势线=时间序列保留scrub
 
   let P=0,N=7;ScrollTrigger.create({trigger:"#s4-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const cbs=[...stage.querySelectorAll('.cbox')];
@@ -504,10 +539,24 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     const seg=1/N;
     const ua=cl((P-3*seg)/seg),a3i=sm(cl((ua-0.12)/0.12)),a3o=sm(cl((ua-0.84)/0.16)),al3=a3i*(1-a3o),pr3=sm(trigProg(trigBars,al3>0.01,1.4));
     const ub=cl((P-4*seg)/seg),a4i=sm(cl((ub-0.12)/0.12)),a4o=sm(cl((ub-0.84)/0.16)),al4=a4i*(1-a4o),pr4=sm(cl((ub-0.18)/0.48));
-    const veil=Math.max(al3,al4);
+    const uc=cl((P-5*seg)/seg),a5i=sm(cl((uc-0.12)/0.12)),a5o=sm(cl((uc-0.84)/0.16)),al5=a5i*(1-a5o),pr5=sm(trigProg(trigSb,al5>0.01,1.6));
+    const ud=cl((P-6*seg)/seg),a6i=sm(cl((ud-0.12)/0.12)),al6=a6i,pr6=sm(trigProg(trigFm,al6>0.01,2));   // 末块不退场
+    const veil=Math.max(al3,al4,al5);   // 农田是 3D 换景，不铺暗幕
     if(veil>0.01){x2.save();x2.globalAlpha=veil*0.82;x2.fillStyle="#16222c";x2.fillRect(0,0,CW,CH);x2.restore();}
     if(al3>0.01) drawBars(x2,pp,pr3,al3,(1-al3)*34);
     if(al4>0.01) drawTrend(x2,pp,pr4,al4,(1-al4)*34);
+    if(al5>0.01) drawStandby(x2,pp,pr5,al5,(1-al5)*34);
+    // 块6 换景：厂区沉下地平线、烟收掉；74 块田透视铺开，停灌逐块变旱黄
+    // 地面是透明网格线，沉下去仍会被俯视相机穿透看到——沉到位后必须整组隐藏
+    grp.position.y=-al6*7; grp.visible=al6<0.55; smoke.material.opacity=on*0.52*(1-al6);
+    const dryN=Math.round(FN*pr6);
+    for(let i=0;i<FN;i++){const t=tiles[i],dry=i<dryN;
+      t.mat.opacity=al6*0.96; t.el.material.opacity=al6*(dry?0.75:0.5);
+      t.mat.color.setHex(dry?0x6a5426:0x2f5a44); t.mat.emissive.setHex(dry?0x4a3812:0x1e4432);
+      t.el.material.color.setHex(dry?0xd2a24a:0x8fd6a8);}
+    if(al6>0.01){ x2.save(); x2.globalAlpha=al6; const bf=Math.max(50,Math.min(78,CW*0.052));
+      x2.textAlign="left"; x2.textBaseline="top"; x2.fillStyle="#d2a24a"; x2.font=FNT(bf,700); x2.fillText("7.4 万公顷",pp.l,pp.t);
+      x2.fillStyle=C.dim; x2.font=FNT(15); wrap(x2,"2021 台湾大旱被停灌的农田 · 每块 = 1,000 公顷 · 水优先供给芯片工厂",pp.l+4,pp.t+bf+6,pp.r-pp.l-8,20); x2.restore(); }
 
     // HUD：选当前最居中的块；图表块隐藏读数
     let best=0,bs=-1;for(let i=0;i<N;i++){const u=cl((P-i*seg)/seg);const tin=sm(cl(u/0.16)),tout=(i===N-1)?0:sm(cl((u-0.84)/0.16));const pres=tin*(1-tout);if(pres>bs){bs=pres;best=i;}}
