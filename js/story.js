@@ -524,9 +524,9 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     const camP=sm(cl(P/0.55)),r=lerp(11,21,camP),hgt=lerp(4.5,9,camP);
     const a6cam=sm(cl((cl((P-6/7)/(1/7))-0.12)/0.12));
     let px=Math.sin(0.42)*r,py=hgt,pz=Math.cos(0.42)*r,ly=lerp(3.6,2.2,camP),lz=0.6;
-    const spin=sm(cl((P-0.87)/0.13));   // 田铺完后的收尾滚动：转大半圈+放大+推镜(氛围动画,合法scrub)
-    const fout=1-sm(cl((P-0.955)/0.045));   // 最后整体淡出融进底色，避免 sticky 推走时被横切一半
-    if(a6cam>0){ px=lerp(px,0.4,a6cam); py=lerp(py,lerp(11.2,9.0,spin),a6cam); pz=lerp(pz,lerp(18.4,15.2,spin),a6cam); ly=lerp(ly,0.3,a6cam); lz=lerp(lz,3.8,a6cam); }
+    const spin=sm(cl((P-0.87)/0.13));   // 田铺完后的收尾滚动：边转(至多130°)边大幅放大+推镜(氛围动画,合法scrub)
+    const outP=sm(cl((P-0.955)/0.045)), fout=1-outP;   // 末尾：文字框上滑与农田淡出同步走
+    if(a6cam>0){ px=lerp(px,0.4,a6cam); py=lerp(py,lerp(11.2,8.6,spin),a6cam); pz=lerp(pz,lerp(18.4,14.2,spin),a6cam); ly=lerp(ly,0.3,a6cam); lz=lerp(lz,3.8,a6cam); }
     cam.position.set(px,py,pz);cam.lookAt(0,ly,lz);
     // 烟越冒越浓
     const on=sm(cl((P-0.04)/0.6));smoke.material.opacity=on*0.52;
@@ -554,7 +554,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     // 块6 换景：厂区沉下地平线、烟收掉；74 块田透视铺开，停灌逐块变旱黄
     // 地面是透明网格线，沉下去仍会被俯视相机穿透看到——沉到位后必须整组隐藏
     grp.position.y=-al6*7; grp.visible=al6<0.55; smoke.material.opacity=on*0.52*(1-al6);
-    farm.rotation.y=0.55+spin*3.6; farm.scale.setScalar(1.45+spin*0.55);
+    farm.rotation.y=0.55+spin*2.27; farm.scale.setScalar(1.45+spin*1.15);   // ≤130° + 放很大(溢出感)
     const dryN=Math.round(FN*pr6);
     for(let i=0;i<FN;i++){const t=tiles[i],dry=i<dryN;
       t.mat.opacity=al6*0.96*fout; t.el.material.opacity=al6*(dry?0.75:0.5)*fout;
@@ -571,7 +571,9 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     if(want){if(hudIdx!==best){hudIdx=best;vEl.textContent=want.v;vEl.style.color=want.c;uEl.textContent=want.u;}hudEl.style.opacity=1;}
     else{hudEl.style.opacity=0;hudIdx=-1;}
 
-    slideBoxes(cbs,P);rdr.render(sc,cam);}
+    slideBoxes(cbs,P);
+    if(outP>0){ const lastBox=cbs[cbs.length-1]; if(lastBox) lastBox.style.transform=`translateX(-50%) translateY(${-outP*innerHeight*1.15}px)`; }   // 末字上滑与田淡出同步
+    rdr.render(sc,cam);}
   animate();
   addEventListener('resize',()=>{cam.aspect=W()/H();fitFov(cam);rdr.setSize(W(),H());});
 })();
