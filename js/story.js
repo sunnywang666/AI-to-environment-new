@@ -487,7 +487,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const smoke=new THREE.Points(sg,new THREE.PointsMaterial({color:0xb08a6a,size:(.32)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(smoke);
 
   // 74 块立体农田（块6 换景：厂区沉下地平线，田块斜透视铺开；每格=1,000 公顷，停灌逐块变旱黄）
-  const FN=74,fCols=10,farm=new THREE.Group();farm.position.set(0,0,1.6);sc.add(farm);
+  const FN=74,fCols=10,farm=new THREE.Group();farm.position.set(0,0,-0.6);farm.scale.setScalar(1.35);sc.add(farm);
   const fGeo=new THREE.BoxGeometry(0.88,0.08,0.88),fEdgeGeo=new THREE.EdgesGeometry(fGeo);
   const tiles=[];for(let i=0;i<FN;i++){const c=i%fCols,r=Math.floor(i/fCols);
     const mat=new THREE.MeshStandardMaterial({color:0x2f5a44,emissive:0x1e4432,emissiveIntensity:.5,metalness:.15,roughness:.7,transparent:true,opacity:0});
@@ -520,9 +520,12 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   function animate(){requestAnimationFrame(animate);
     if(!vis(vroot,300))return;
     grp.rotation.y=Math.sin(P*0.6)*0.06;
-    // 揭示式相机：先近看烟囱口，再拉远露出整座厂区+柴油阵列+烟羽
+    // 揭示式相机：先近看烟囱口，再拉远露出整座厂区+柴油阵列+烟羽；块6 切到正对农田机位(去侧角、减斜透视、田铺满)
     const camP=sm(cl(P/0.55)),r=lerp(11,21,camP),hgt=lerp(4.5,9,camP);
-    cam.position.set(Math.sin(0.42)*r,hgt,Math.cos(0.42)*r);cam.lookAt(0,lerp(3.6,2.2,camP),0.6);
+    const a6cam=sm(cl((cl((P-6/7)/(1/7))-0.12)/0.12));
+    let px=Math.sin(0.42)*r,py=hgt,pz=Math.cos(0.42)*r,ly=lerp(3.6,2.2,camP),lz=0.6;
+    if(a6cam>0){ px=lerp(px,0.4,a6cam); py=lerp(py,10.4,a6cam); pz=lerp(pz,17.4,a6cam); ly=lerp(ly,0.3,a6cam); lz=lerp(lz,3.8,a6cam); }
+    cam.position.set(px,py,pz);cam.lookAt(0,ly,lz);
     // 烟越冒越浓
     const on=sm(cl((P-0.04)/0.6));smoke.material.opacity=on*0.52;
     for(let i=0;i<NS;i++){sst[i]+=0.005*(0.4+on);if(sst[i]>1)seedSmoke(i);
@@ -555,8 +558,9 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
       t.mat.color.setHex(dry?0x6a5426:0x2f5a44); t.mat.emissive.setHex(dry?0x4a3812:0x1e4432);
       t.el.material.color.setHex(dry?0xd2a24a:0x8fd6a8);}
     if(al6>0.01){ x2.save(); x2.globalAlpha=al6; const bf=Math.max(50,Math.min(78,CW*0.052));
+      x2.shadowColor="rgba(10,16,22,.95)"; x2.shadowBlur=16;   // 字压在金色田块上，垫深影保可读
       x2.textAlign="left"; x2.textBaseline="top"; x2.fillStyle="#d2a24a"; x2.font=FNT(bf,700); x2.fillText("7.4 万公顷",pp.l,pp.t);
-      x2.fillStyle=C.dim; x2.font=FNT(15); wrap(x2,"2021 台湾大旱被停灌的农田 · 每块 = 1,000 公顷 · 水优先供给芯片工厂",pp.l+4,pp.t+bf+6,pp.r-pp.l-8,20); x2.restore(); }
+      x2.fillStyle="#cdd6da"; x2.font=FNT(15); wrap(x2,"2021 台湾大旱被停灌的农田 · 每块 = 1,000 公顷 · 水优先供给芯片工厂",pp.l+4,pp.t+bf+6,pp.r-pp.l-8,20); x2.restore(); }
 
     // HUD：选当前最居中的块；图表块隐藏读数
     let best=0,bs=-1;for(let i=0;i<N;i++){const u=cl((P-i*seg)/seg);const tin=sm(cl(u/0.16)),tout=(i===N-1)?0:sm(cl((u-0.84)/0.16));const pres=tin*(1-tout);if(pres>bs){bs=pres;best=i;}}
