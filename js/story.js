@@ -524,8 +524,9 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     const camP=sm(cl(P/0.55)),r=lerp(11,21,camP),hgt=lerp(4.5,9,camP);
     const a6cam=sm(cl((cl((P-6/7)/(1/7))-0.12)/0.12));
     let px=Math.sin(0.42)*r,py=hgt,pz=Math.cos(0.42)*r,ly=lerp(3.6,2.2,camP),lz=0.6;
-    const spin=sm(cl((P-0.90)/0.10));   // 田铺完后的收尾滚动：旋转+放大+推镜(氛围动画,合法scrub)
-    if(a6cam>0){ px=lerp(px,0.4,a6cam); py=lerp(py,lerp(11.2,9.2,spin),a6cam); pz=lerp(pz,lerp(18.4,15.6,spin),a6cam); ly=lerp(ly,0.3,a6cam); lz=lerp(lz,3.8,a6cam); }
+    const spin=sm(cl((P-0.87)/0.13));   // 田铺完后的收尾滚动：转大半圈+放大+推镜(氛围动画,合法scrub)
+    const fout=1-sm(cl((P-0.955)/0.045));   // 最后整体淡出融进底色，避免 sticky 推走时被横切一半
+    if(a6cam>0){ px=lerp(px,0.4,a6cam); py=lerp(py,lerp(11.2,9.0,spin),a6cam); pz=lerp(pz,lerp(18.4,15.2,spin),a6cam); ly=lerp(ly,0.3,a6cam); lz=lerp(lz,3.8,a6cam); }
     cam.position.set(px,py,pz);cam.lookAt(0,ly,lz);
     // 烟越冒越浓
     const on=sm(cl((P-0.04)/0.6));smoke.material.opacity=on*0.52;
@@ -553,13 +554,13 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     // 块6 换景：厂区沉下地平线、烟收掉；74 块田透视铺开，停灌逐块变旱黄
     // 地面是透明网格线，沉下去仍会被俯视相机穿透看到——沉到位后必须整组隐藏
     grp.position.y=-al6*7; grp.visible=al6<0.55; smoke.material.opacity=on*0.52*(1-al6);
-    farm.rotation.y=0.55+spin*0.5; farm.scale.setScalar(1.45+spin*0.45);
+    farm.rotation.y=0.55+spin*3.6; farm.scale.setScalar(1.45+spin*0.55);
     const dryN=Math.round(FN*pr6);
     for(let i=0;i<FN;i++){const t=tiles[i],dry=i<dryN;
-      t.mat.opacity=al6*0.96; t.el.material.opacity=al6*(dry?0.75:0.5);
+      t.mat.opacity=al6*0.96*fout; t.el.material.opacity=al6*(dry?0.75:0.5)*fout;
       t.mat.color.setHex(dry?0x6a5426:0x2f5a44); t.mat.emissive.setHex(dry?0x4a3812:0x1e4432);
       t.el.material.color.setHex(dry?0xd2a24a:0x8fd6a8);}
-    if(al6>0.01){ x2.save(); x2.globalAlpha=al6; const bf=Math.max(50,Math.min(78,CW*0.052));
+    if(al6>0.01&&fout>0.01){ x2.save(); x2.globalAlpha=al6*fout; const bf=Math.max(50,Math.min(78,CW*0.052));
       x2.shadowColor="rgba(10,16,22,.95)"; x2.shadowBlur=16;   // 字压在金色田块上，垫深影保可读
       x2.textAlign="left"; x2.textBaseline="top"; x2.fillStyle="#d2a24a"; x2.font=FNT(bf,700); x2.fillText("7.4 万公顷",pp.l,pp.t);
       x2.fillStyle="#cdd6da"; x2.font=FNT(15); wrap(x2,"2021 台湾大旱被停灌的农田 · 每块 = 1,000 公顷 · 水优先供给芯片工厂",pp.l+4,pp.t+bf+6,pp.r-pp.l-8,20); x2.restore(); }
