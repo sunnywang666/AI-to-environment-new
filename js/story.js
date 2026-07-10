@@ -912,7 +912,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
 })();
 
 
-/* ---------- 尾声 · 回到聊天框 + 一滴水落下涟漪（滚动驱动，首尾呼应） ---------- */
+/* ---------- 尾声 · 回到聊天框 + 一滴水落下涟漪（触发后按时间自动播放：汇聚→滴落→涟漪一气呵成，不受滚动顿挫影响；文字框仍随滚动） ---------- */
 (function closingScene(){
   const stage=document.getElementById('close-stage'); if(!stage) return;
   const cv=document.getElementById('close-canvas'); if(!cv) return;
@@ -921,7 +921,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const cbs=[...stage.querySelectorAll('.cbox')];
   const input=document.getElementById('closeInput');
   const userDrops=[];                                   // 每次回车发送 push 一帧号，触发一滴
-  let W=0,Hh=0,DPR=Math.min(devicePixelRatio||1,2), fr=0;
+  let W=0,Hh=0,DPR=Math.min(devicePixelRatio||1,2), fr=0;const trigClose={p:0};
   function rz(){W=innerWidth;Hh=innerHeight;cv.width=W*DPR;cv.height=Hh*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
   rz(); addEventListener('resize',rz);
   const DBG=new URLSearchParams(location.search).get('dbgp');
@@ -943,11 +943,13 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     ctx.clearRect(0,0,W,Hh);
     const r2=vroot.getBoundingClientRect(); const visible=!(r2.bottom<-60||r2.top>innerHeight+60);
     if(DBG===null && !visible){ if(input) input.classList.remove('on'); return; }
+    // AP=动画进度：进入段落即触发，10 秒按时间播完(汇聚→滴落→涟漪→定格)，滚动只负责触发不驱动
+    const AP=DBG!==null?P:trigProg(trigClose,P>0.04,10);
     const cx=W*0.5, boxY=Hh*0.58, boxW=Math.min(560,W*0.74), boxH=66, boxTop=boxY-boxH/2;
     const srcY=Hh*0.42, waterY=Hh*0.82, maxDim=Math.hypot(W,Hh);
-    const appear=sm(cl(P/0.06));
-    const waterA=sm(cl((P-0.66)/0.09));
-    const settle=sm(cl((P-0.72)/0.08));
+    const appear=sm(cl(AP/0.06));
+    const waterA=sm(cl((AP-0.66)/0.09));
+    const settle=sm(cl((AP-0.72)/0.08));
 
     // —— 水面（锁定落点）——
     if(waterA>0){
@@ -962,11 +964,11 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     // —— 四色粒子风暴：涌现 → 全屏铺满 → 向心涡旋卷成一滴 ——
     ctx.save();
     for(const p of PARTS){
-      const life=sm(cl((P-0.08-p.delay*0.42)/0.13)); if(life<=0) continue;
-      const gin=sm(cl((P-0.55)/0.10));
-      const shrink=0.30*sm(cl((P-0.12)/0.44));
+      const life=sm(cl((AP-0.08-p.delay*0.42)/0.13)); if(life<=0) continue;
+      const gin=sm(cl((AP-0.55)/0.10));
+      const shrink=0.30*sm(cl((AP-0.12)/0.44));
       const r=p.rad0*maxDim*0.5*(1-shrink)*(1-gin);
-      const ang=p.ang0 + P*p.spin*3.4 + life*0.6;
+      const ang=p.ang0 + AP*p.spin*3.4 + life*0.6;
       const px=cx+Math.cos(ang)*r, py=srcY+Math.sin(ang)*r*0.8;
       const a=appear*cl(life*1.3)*(1-gin)*0.82; if(a<=0.01) continue;
       ctx.globalAlpha=a; ctx.fillStyle=p.col; ctx.beginPath(); ctx.arc(px,py,p.sz*(0.5+0.6*life),0,7); ctx.fill();
@@ -974,15 +976,15 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     ctx.restore();
 
     // —— 第一滴（入场自动，滴完静止；不再自动循环）——
-    const coreGrow=sm(cl((P-0.50)/0.10)), firstFall=sm(cl((P-0.60)/0.10));
-    if(P>0.46 && P<0.74){
+    const coreGrow=sm(cl((AP-0.50)/0.10)), firstFall=sm(cl((AP-0.60)/0.10));
+    if(AP>0.46 && AP<0.74){
       const dy=lerp(srcY,waterY,Math.pow(firstFall,1.7)), ds=4+coreGrow*13;
-      const pulse=coreGrow*(1-sm(cl((P-0.62)/0.08)));
+      const pulse=coreGrow*(1-sm(cl((AP-0.62)/0.08)));
       if(pulse>0){ const pg=ctx.createRadialGradient(cx,srcY,0,cx,srcY,ds*3.6); pg.addColorStop(0,'rgba(195,240,250,'+(0.55*pulse*appear).toFixed(3)+')'); pg.addColorStop(1,'rgba(150,220,238,0)'); ctx.fillStyle=pg; ctx.beginPath(); ctx.arc(cx,srcY,ds*3.6,0,7); ctx.fill(); }
       if(firstFall>0){ ctx.save(); ctx.globalAlpha=appear*0.28; const lg=ctx.createLinearGradient(cx,dy-80,cx,dy); lg.addColorStop(0,'rgba(160,228,242,0)'); lg.addColorStop(1,'rgba(160,228,242,.65)'); ctx.strokeStyle=lg; ctx.lineWidth=2.8; ctx.beginPath(); ctx.moveTo(cx,dy-80); ctx.lineTo(cx,dy); ctx.stroke(); ctx.restore(); }
       drawDrop(cx,dy,ds,appear*(1-sm(cl((firstFall-0.86)/0.14))));
     }
-    const firstRip=cl((P-0.70)/0.16);
+    const firstRip=cl((AP-0.70)/0.16);
     if(firstRip>0 && firstRip<1){ rings(cx,waterY,firstRip,maxDim*0.5,0.5,1); }
 
     // —— 用户回车发送：小汇聚 → 滴落 → 涟漪（每句一滴）——
