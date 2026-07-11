@@ -1016,6 +1016,147 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   frame();
 })();
 
+/* ---------- ⑧ 另一条路：东数西算——算力东→西，风光绿电直接供进机房；PUE 降、WUE 仍无标准 ---------- */
+(function s8Scene(){
+  const stage=document.getElementById('s8-stage'), cv=document.getElementById('s8-canvas');
+  if(!stage||!cv||!window.THREE) return;
+  const W=()=>innerWidth,H=()=>innerHeight;
+  const COL={water:0x5fb6cf,energy:0xd2a24a,leaf:0x9aab6a};
+  const E_WATER=0x8fdcf0, E_ENERGY=0xeab873, E_LEAF=0xc2d49a;
+  const sc=new THREE.Scene(); sc.fog=new THREE.FogExp2(0x1a2632,0.012);
+  const cam=new THREE.PerspectiveCamera(50,W()/H(),0.1,500);
+  const rdr=new THREE.WebGLRenderer({antialias:innerWidth>640,canvas:cv});
+  rdr.setPixelRatio(Math.min(devicePixelRatio,innerWidth<640?1.5:2)); rdr.setSize(W(),H()); rdr.setClearColor(0x1a2632,1);
+  sc.add(new THREE.AmbientLight(0x4a5a64,1)); const key=new THREE.DirectionalLight(0xcfe6ec,0.7); key.position.set(-5,12,8); sc.add(key);
+  const EDGE=(m,c,o)=>{const e=new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),new THREE.LineBasicMaterial({color:c,transparent:true,opacity:o==null?0.9:o})); m.add(e); return e;};
+  const V=(x,y,z)=>({x:x,y:y,z:z});
+
+  // 东部（右）：密集小机柜阵列 = 算力需求
+  const east=new THREE.Group(); east.position.set(8.2,0,0); sc.add(east);
+  const racks=[];
+  for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){
+    const r=new THREE.Mesh(new THREE.BoxGeometry(0.62,1.5,0.62),new THREE.MeshStandardMaterial({color:0x2c4a5a,emissive:0x205668,emissiveIntensity:0.55,metalness:0.4,roughness:0.5}));
+    r.position.set(i*1.1,0.75,j*1.1); east.add(r); EDGE(r,E_WATER,0.9); racks.push(r);
+  }
+  east.scale.setScalar(0.001);
+
+  // 西部枢纽（左）：一座大机房
+  const west=new THREE.Group(); west.position.set(-7.6,0,0); sc.add(west);
+  const wMat=new THREE.MeshStandardMaterial({color:0x2c4a5a,emissive:0x205668,emissiveIntensity:0.6,metalness:0.4,roughness:0.5});
+  const wBox=new THREE.Mesh(new THREE.BoxGeometry(3.4,2.2,3.0),wMat); wBox.position.y=1.1; west.add(wBox); EDGE(wBox,E_WATER,0.95);
+  const wChips=[]; for(let i=-1;i<=1;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.16,1.9),new THREE.MeshStandardMaterial({color:0x3a4a44,emissive:COL.energy,emissiveIntensity:0.25})); c.position.set(i*1.05,2.3,0); west.add(c); EDGE(c,E_ENERGY,0.7); wChips.push(c);}
+  west.scale.setScalar(0.001);
+
+  // 风机（西部更西侧）：塔 + 三叶片，转起来
+  const farm=new THREE.Group(); sc.add(farm); const rotors=[];
+  [[-10.4,-2.8,0.95],[-9.5,0.2,0.8],[-11.0,-1.0,0.72]].forEach(a=>{
+    const g=new THREE.Group(); g.position.set(a[0],0,a[1]); g.scale.setScalar(a[2]); farm.add(g);
+    const tw=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.13,3.6,10),new THREE.MeshStandardMaterial({color:0x4d5b52,emissive:0x2e3a2a,emissiveIntensity:0.4}));
+    tw.position.y=1.8; g.add(tw); EDGE(tw,E_LEAF,0.7);
+    const hub=new THREE.Group(); hub.position.set(0,3.6,0.16); g.add(hub); rotors.push(hub);
+    for(let b=0;b<3;b++){const bl=new THREE.Mesh(new THREE.BoxGeometry(0.1,1.5,0.04),new THREE.MeshStandardMaterial({color:0x6f7f66,emissive:COL.leaf,emissiveIntensity:0.35}));
+      bl.position.set(0,0.75,0); const w2=new THREE.Group(); w2.rotation.z=b*2.094; w2.add(bl); hub.add(w2); EDGE(bl,E_LEAF,0.85);}
+  });
+  farm.scale.setScalar(0.001);
+
+  // 光伏阵列（西部前方）：倾斜板
+  const pv=new THREE.Group(); sc.add(pv); const panels=[];
+  for(let r=0;r<3;r++)for(let c=0;c<5;c++){
+    const p=new THREE.Mesh(new THREE.BoxGeometry(0.92,0.04,0.58),new THREE.MeshStandardMaterial({color:0x22323e,emissive:COL.energy,emissiveIntensity:0.16,metalness:0.6,roughness:0.35}));
+    p.position.set(-9.7+c*1.12,0.5,3.2+r*1.0); p.rotation.x=-0.72; pv.add(p); EDGE(p,E_ENERGY,0.8); panels.push(p);
+  }
+  pv.scale.setScalar(0.001);
+
+  // 流：东→西的算力迁移（青）；风光→机房的绿电（leaf）
+  function stream(from,to,arc,color,count,size,rad,vapor){
+    const g=new THREE.BufferGeometry(), pos=new Float32Array(count*3), t=new Float32Array(count);
+    const ox=new Float32Array(count), oy=new Float32Array(count), oz=new Float32Array(count);
+    for(let i=0;i<count;i++){ t[i]=Math.random(); const a=Math.random()*6.283, r=Math.sqrt(Math.random())*rad; ox[i]=Math.cos(a)*r; oy[i]=Math.sin(a)*r*0.7; oz[i]=Math.sin(a)*r; }
+    g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    const pts=new THREE.Points(g,new THREE.PointsMaterial({color:color,size:(size)*PSCALE,transparent:true,opacity:0,depthWrite:false})); sc.add(pts);
+    return {pts:pts,g:g,pos:pos,t:t,ox:ox,oy:oy,oz:oz,from:from,to:to,arc:arc,vapor:!!vapor};
+  }
+  const ptOf=(s,k)=>{const a=s.from,b=s.to; return [a.x+(b.x-a.x)*k, a.y+(b.y-a.y)*k+Math.sin(k*Math.PI)*s.arc, a.z+(b.z-a.z)*k];};
+  const sMove =stream(V(6.6,1.5,0),V(-5.9,1.6,0),1.9,COL.water,240,0.24,0.42,false);   // 东数西算
+  const sGrid =stream(V(-10.3,3.1,-0.4),V(-8.4,2.3,0.1),0.45,COL.leaf,140,0.22,0.34,false); // 风电进机房（扎进机房顶）
+  const sSun  =stream(V(-8.8,0.8,3.6),V(-7.9,1.1,1.7),0.45,COL.energy,110,0.2,0.3,false); // 光伏进机房
+  const sSteam=stream(V(-7.6,2.4,0),V(-8.0,5.4,0.9),0.5,COL.water,90,innerWidth<640?0.12:0.22,0.42,true); // 机房散热（PUE 降→变淡；手机端 PSCALE 会放大，这里先缩）
+
+  // WUE：机房上方悬着的一滴水——电有尺子了，水还没有
+  const drop=new THREE.Mesh(new THREE.SphereGeometry(0.5,26,20),new THREE.MeshStandardMaterial({color:0x3d7188,emissive:COL.water,emissiveIntensity:0.85,transparent:true,opacity:0,metalness:0.2,roughness:0.25}));
+  drop.position.set(-7.4,4.5,0.4); drop.scale.y=1.25; sc.add(drop);
+  const dEdge=new THREE.Mesh(new THREE.SphereGeometry(0.62,24,18),new THREE.MeshBasicMaterial({color:E_WATER,transparent:true,opacity:0,side:THREE.BackSide}));
+  dEdge.scale.y=1.25; drop.add(dEdge);   // 外发光壳（不是线框，避免"网球"感）
+
+  const S={east:0,move:0,west:0,green:0,zw:0,pue:0,wue:0};
+  let P=0,fr=0;
+  const DBG=new URLSearchParams(location.search).get('dbgp');
+  const labels={}; stage.querySelectorAll('.s8lab').forEach(l=>labels[l.dataset.k]=l);
+  const cbs=[...stage.querySelectorAll('.cbox')];
+  const vroot=document.getElementById('s8-track');
+  const h1=document.getElementById('s8-h1'),h2=document.getElementById('s8-h2'),h3=document.getElementById('s8-h3');
+  const gV=document.getElementById('s8-green'),pV=document.getElementById('s8-pue');
+  const trigG={p:0},trigP={p:0};
+
+  const C_WIDE={p:[0,5.4,20.5],l:[0,1.6,0]}, C_WEST={p:[-5.0,4.9,15.0],l:[-8.8,1.9,0.6]};
+  const mix=(a,b,t)=>a+(b-a)*t;
+  const lc=(A,B,t)=>({p:[mix(A.p[0],B.p[0],t),mix(A.p[1],B.p[1],t),mix(A.p[2],B.p[2],t)],l:[mix(A.l[0],B.l[0],t),mix(A.l[1],B.l[1],t),mix(A.l[2],B.l[2],t)]});
+  // 推近西部后不再拉回：HUD 在左，主体保持在画面中右，读数不被 3D 压住
+  function camFor(p){
+    if(p<0.28) return {c:C_WIDE,t:0};
+    if(p<0.36) {const t=sm((p-0.28)/0.08); return {c:lc(C_WIDE,C_WEST,t),t:t};}
+    return {c:C_WEST,t:1};
+  }
+  function setStream(s,amt){ s.pts.material.opacity=amt>0.02?0.92*Math.min(1,amt*1.6):0; const adv=0.005+amt*0.012;
+    for(let i=0;i<s.t.length;i++){ s.t[i]+=adv; if(s.t[i]>1)s.t[i]-=1; const k=s.t[i];
+      if(k>amt){ s.pos[i*3+1]=-999; continue; }
+      const p=ptOf(s,k), spread=s.vapor?(0.25+k*1.8):1;
+      s.pos[i*3]=p[0]+s.ox[i]*spread; s.pos[i*3+1]=p[1]+s.oy[i]*spread; s.pos[i*3+2]=p[2]+s.oz[i]*spread; }
+    s.g.attributes.position.needsUpdate=true; }
+  const lab=(k,v)=>{ if(labels[k]) labels[k].style.opacity=v; };
+
+  function tick(){requestAnimationFrame(tick); fr++;
+    if(DBG!==null){ P=parseFloat(DBG); }
+    else { const rect=vroot.getBoundingClientRect(); P=Math.max(0,Math.min(1, -rect.top/(vroot.offsetHeight-innerHeight))); }
+    const r2=vroot.getBoundingClientRect(); if(DBG===null && (r2.bottom<-50 || r2.top>innerHeight+50)) return;
+    S.east=sm(cl((P-0.00)/0.05)); S.move=sm(cl((P-0.13)/0.08)); S.west=sm(cl((P-0.16)/0.08));
+    S.green=sm(cl((P-0.30)/0.08)); S.zw=sm(cl((P-0.47)/0.08)); S.pue=sm(cl((P-0.63)/0.08)); S.wue=sm(cl((P-0.80)/0.08));
+    const cfo=camFor(P), cf=cfo.c, wide=1-cfo.t;
+    cam.position.set(cf.p[0],cf.p[1],cf.p[2]); cam.lookAt(cf.l[0],cf.l[1],cf.l[2]);
+
+    east.scale.setScalar(Math.max(0.001,S.east));
+    racks.forEach((r,i)=>r.material.emissiveIntensity=0.35+S.east*(0.35+0.3*Math.sin(fr*0.05+i)));
+    west.scale.setScalar(Math.max(0.001,S.west));
+    wChips.forEach((c,i)=>c.material.emissiveIntensity=0.2+S.west*(0.4+0.35*Math.sin(fr*0.05+i*2)));
+    farm.scale.setScalar(Math.max(0.001,S.green));
+    pv.scale.setScalar(Math.max(0.001,S.green));
+    const spin=0.012+S.green*0.05; rotors.forEach((h,i)=>h.rotation.z+=spin*(0.85+i*0.12));
+    panels.forEach((p,i)=>p.material.emissiveIntensity=0.18+S.green*(0.35+0.25*Math.sin(fr*0.03+i*0.7)));
+    // 中卫绿电直供：绿电流量加粗、机房被绿电点亮
+    const feed=Math.min(1,S.green+S.zw*0.6);
+    setStream(sMove,S.move);   lab('east',S.move*wide);
+    setStream(sGrid,feed);     lab('west',S.west*wide);
+    setStream(sSun,feed*0.9);  lab('green',S.green*(1-S.wue));
+    wMat.emissiveIntensity=0.6+S.zw*0.5;
+    // 机房散热：PUE 降下来后蒸汽变淡（更少的电烧在散热上）
+    setStream(sSteam,S.west*(1-S.pue*0.62));
+    sSteam.pts.material.opacity*= 0.5*(1-S.pue*0.62);
+    // WUE：一滴水悬在机房上方，没有尺子量它
+    const dp=S.wue; drop.material.opacity=dp*0.95; dEdge.material.opacity=dp*0.22;
+    drop.position.y=4.5+Math.sin(fr*0.02)*0.22; drop.material.emissiveIntensity=0.6+0.3*Math.sin(fr*0.05);
+    // 读数（唯一真值→触发式播到真值后定格，不随滚动来回）
+    if(gV) gV.textContent=Math.round(sm(trigProg(trigG,S.green>0.35,2))*86);
+    if(pV) pV.textContent=(1.54-sm(trigProg(trigP,S.pue>0.35,2))*0.08).toFixed(2);
+    if(h1) h1.style.opacity=Math.min(sm(cl((P-0.28)/0.06)),1-sm(cl((P-0.58)/0.05)));
+    if(h2) h2.style.opacity=Math.min(sm(cl((P-0.61)/0.06)),1-sm(cl((P-0.78)/0.05)));
+    if(h3) h3.style.opacity=sm(cl((P-0.81)/0.06));
+    slideBoxes(cbs,P);
+    rdr.render(sc,cam);
+  }
+  tick();
+  addEventListener('resize',()=>{cam.aspect=W()/H();fitFov(cam);rdr.setSize(W(),H());});
+})();
+
 setTimeout(function(){try{dispatchEvent(new Event('resize'));}catch(e){}},80);
 
-['s1-canvas','chip-canvas','s3-canvas','s4-canvas','s6-canvas','s7-canvas'].forEach(function(id){var c=document.getElementById(id);if(c)c.addEventListener('webglcontextlost',function(e){e.preventDefault();});});
+['s1-canvas','chip-canvas','s3-canvas','s4-canvas','s6-canvas','s7-canvas','s8-canvas'].forEach(function(id){var c=document.getElementById(id);if(c)c.addEventListener('webglcontextlost',function(e){e.preventDefault();});});

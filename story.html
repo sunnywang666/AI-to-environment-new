@@ -271,6 +271,39 @@
   #s7-hud .u{font-size:13px;color:#7d8a90}
 </style>
 
+<section class="ctrans" data-n="8" data-k="⑧ 另一条路" data-t="把机房搬到风和光的旁边"><canvas></canvas></section>
+<section id="s8w"><div id="s8-track"><div id="s8-stage">
+  <canvas id="s8-canvas"></canvas>
+  <div id="s8-labels">
+    <div class="s8lab" data-k="east" style="right:6%;top:66%;text-align:right">东部 · 算力需求密集</div>
+    <div class="s8lab" data-k="west" style="left:6%;top:66%">西部枢纽 · 风光富集</div>
+    <div class="s8lab" data-k="green" style="left:6%;top:24%">风电与光伏直接供进机房</div>
+  </div>
+  <div id="s8-hud">
+    <div class="hud-num" id="s8-h1"><div class="v" style="color:var(--leaf)"><span id="s8-green">0</span>%</div>
+      <div class="u">内蒙古和林格尔集群绿电使用占比 · 2025 年前 11 个月（新华网）</div></div>
+    <div class="hud-num" id="s8-h2"><div class="v" style="color:var(--energy)" id="s8-pue">1.54</div>
+      <div class="u">全国数据中心平均 PUE · 2022 年 1.54 → 2024 年 1.46；八大枢纽集群约 1.3（信通院 / 国家数据局）</div></div>
+    <div class="hud-num" id="s8-h3"><div class="v" style="color:var(--water);font-size:clamp(30px,3.4vw,50px)">仍在制定中</div>
+      <div class="u">数据中心水资源使用效率（WUE）国家标准 · 计划号 20230195-T-469</div></div>
+  </div>
+  <div class="box cbox"><p>这套循环不是无解的。中国选的路，是把机房搬到风和光的旁边。</p></div>
+  <div class="box cbox"><p>2022 年 2 月，"<span class="hl hl-l">东数西算</span>"工程启动：8 个国家算力枢纽、10 个数据中心集群，把东部的算力需求引向西部。到 2024 年 6 月，八大枢纽机架总规模超 195 万架。</p></div>
+  <div class="box cbox"><p>西部有风、有光。内蒙古和林格尔集群绿电使用占比达<span class="hl hl-l">86%</span>；甘肃庆阳集群靠"源网荷储一体化"实现 90% 以上可再生能源供电，PUE 低于 1.20、WUE 低于 1.1，一年减碳约 25 万吨。</p></div>
+  <div class="box cbox"><p>宁夏中卫——开头那个年降水只有 200 毫米、却建起六座超大型数据中心的地方——正在建全国首个大规模"算电协同"绿电直供项目：一期<span class="hl hl-g">200 万千瓦</span>风光装机，每年可向机房送去 22.9 亿千瓦时绿电。</p></div>
+  <div class="box cbox"><p>机房本身也在变省。衡量标准是 PUE：总用电除以计算真正用掉的电，越接近 1，浪费在散热上的电越少。全国平均 PUE 已从 2022 年的 1.54 降到 2024 年的<span class="hl hl-g">1.46</span>，八大枢纽集群约 1.3，最先进的低至 1.04；政策要求 2025 年新建大型数据中心低于 1.3、枢纽节点低于 1.25。</p></div>
+  <div class="box cbox"><p>但水的账仍然没算清：衡量机房用水的 WUE，<span class="hl hl-w">国家标准至今还在制定中</span>。电已经有了尺子，水还在等一把。</p></div>
+</div></div></section>
+<style>
+  #s8-track{height:700vh;position:relative}
+  #s8-stage{position:sticky;top:0;height:100vh;overflow:hidden;background:#1a2632}
+  #s8-canvas{position:absolute;inset:0;width:100%;height:100%}
+  #s8-labels{position:absolute;inset:0;pointer-events:none;z-index:2}
+  .s8lab{position:absolute;max-width:24%;font-size:13px;line-height:1.5;color:#cdd6da;opacity:0;transition:opacity .3s;text-shadow:0 2px 12px rgba(0,0,0,.75)}
+  #s8-hud{position:absolute;inset:0;pointer-events:none}
+  #s8-hud .hud-num{opacity:0;transition:opacity .45s}
+</style>
+
 <section id="closew"><div id="close-track"><div id="close-stage">
   <canvas id="close-canvas"></canvas>
   <input id="closeInput" type="text" maxlength="40" placeholder="你问 AI 的那一句…" autocomplete="off">
@@ -289,7 +322,7 @@
 
 <section class="endnote">
   <div class="kicker">数据来源与方法说明</div>
-  <p class="src"><a href="https://www.iea.org/reports/energy-and-ai" target="_blank" rel="noopener">IEA《Energy and AI》(2025)</a> · <a href="https://unu.edu/inweh/news/environmental-cost-of-AIs-Enrgy-use-carbon-water-and-land-footprints" target="_blank" rel="noopener">UNU-INWEH (2026)</a> · <a href="https://arxiv.org/abs/2304.03271" target="_blank" rel="noopener">UC Riverside CACM (2025)</a> · <a href="https://eta-publications.lbl.gov/sites/default/files/2024-12/lbnl-2024-united-states-data-center-energy-usage-report.pdf" target="_blank" rel="noopener">LBNL (2024)</a> · <a href="https://arxiv.org/abs/2412.06288v1" target="_blank" rel="noopener">《The Unpaid Toll》(2024)</a> · <a href="https://www.pbs.org/newshour/nation/why-is-this-so-high-electric-bills-in-west-virginia-now-top-mortgages-despite-trumps-promises" target="_blank" rel="noopener">PBS/AP (2026)</a> · <a href="https://ourworldindata.org/energy" target="_blank" rel="noopener">Ember/OWID (2026)</a> · <a href="https://www.eia.gov/electricity/" target="_blank" rel="noopener">EIA</a> · <a href="https://www.selc.org/press-release/groups-appeal-permit-for-xais-south-memphis-data-center-decisions-around-unpermitted-methane-gas-turbines/" target="_blank" rel="noopener">SELC/田纳西大学 (2025)</a> · <a href="https://gridstrategiesllc.com/wp-content/uploads/National-Load-Growth-Report-2024.pdf" target="_blank" rel="noopener">Grid Strategies (2024)</a> · Reuters (2021) · <a href="https://www.ipcc.ch/assessment-report/ar6/" target="_blank" rel="noopener">IPCC AR6</a>。部分数字在不同来源间存在口径差异，是测量方法与统计边界不同所致，正文已标注核心差异。</p>
+  <p class="src"><a href="https://www.iea.org/reports/energy-and-ai" target="_blank" rel="noopener">IEA《Energy and AI》(2025)</a> · <a href="https://unu.edu/inweh/news/environmental-cost-of-AIs-Enrgy-use-carbon-water-and-land-footprints" target="_blank" rel="noopener">UNU-INWEH (2026)</a> · <a href="https://arxiv.org/abs/2304.03271" target="_blank" rel="noopener">UC Riverside CACM (2025)</a> · <a href="https://eta-publications.lbl.gov/sites/default/files/2024-12/lbnl-2024-united-states-data-center-energy-usage-report.pdf" target="_blank" rel="noopener">LBNL (2024)</a> · <a href="https://arxiv.org/abs/2412.06288v1" target="_blank" rel="noopener">《The Unpaid Toll》(2024)</a> · <a href="https://www.pbs.org/newshour/nation/why-is-this-so-high-electric-bills-in-west-virginia-now-top-mortgages-despite-trumps-promises" target="_blank" rel="noopener">PBS/AP (2026)</a> · <a href="https://ourworldindata.org/energy" target="_blank" rel="noopener">Ember/OWID (2026)</a> · <a href="https://www.eia.gov/electricity/" target="_blank" rel="noopener">EIA</a> · <a href="https://www.selc.org/press-release/groups-appeal-permit-for-xais-south-memphis-data-center-decisions-around-unpermitted-methane-gas-turbines/" target="_blank" rel="noopener">SELC/田纳西大学 (2025)</a> · <a href="https://gridstrategiesllc.com/wp-content/uploads/National-Load-Growth-Report-2024.pdf" target="_blank" rel="noopener">Grid Strategies (2024)</a> · Reuters (2021) · <a href="https://www.ipcc.ch/assessment-report/ar6/" target="_blank" rel="noopener">IPCC AR6</a> · <a href="https://www.ndrc.gov.cn/xxgk/jd/jd/202202/t20220217_1315795.html" target="_blank" rel="noopener">国家发改委等四部门「东数西算」启动 (2022)</a> · <a href="https://www.gov.cn/lianbo/bumen/202408/content_6971147.htm" target="_blank" rel="noopener">国家数据局：八大枢纽机架规模与 PUE (2024)</a> · <a href="https://www.ndrc.gov.cn/xwdt/tzgg/202112/t20211208_1307105.html" target="_blank" rel="noopener">《推动数据中心和 5G 等新型基础设施绿色高质量发展实施方案》(2021, PUE 1.3/1.25)</a> · <a href="https://www.stdaily.com/web/gdxw/2025-10/27/content_421569.html" target="_blank" rel="noopener">中国信通院《中国绿色算力发展研究报告》(2024 平均 PUE 1.46)</a> · <a href="https://www.news.cn/liangzi/20251224/715fa9621902447e8a1a5c9742c76863/c.html" target="_blank" rel="noopener">新华网：和林格尔集群绿电占比 86% (2025)</a> · <a href="https://www.nda.gov.cn/sjj/ywpd/szkjyjcss/1222/20240926133451065388117_pc.html" target="_blank" rel="noopener">国家数据局：庆阳集群绿电与 PUE/WUE 案例 (2024)</a> · <a href="https://www.news.cn/digital/20260506/957be30d7eab439db130aa8d3c6400ee/c.html" target="_blank" rel="noopener">新华网：中卫「算电协同」绿电直供 (2026)</a> · <a href="https://std.samr.gov.cn/gb/search/gbDetailedCNF?id=CAC4327430CB595EE05397BE0A0A0A38" target="_blank" rel="noopener">国家标准计划 20230195-T-469《数据中心 水资源使用效率》(制定中)</a>。部分数字在不同来源间存在口径差异，是测量方法与统计边界不同所致，正文已标注核心差异。</p>
 </section>
 
 <style>
@@ -320,6 +353,8 @@
   #s7-labels .s7lab[data-k="water"]{left:4% !important;top:66% !important}
   #s7-labels .s7lab[data-k="power"]{right:4% !important;top:60% !important}
   #s7-labels .s7lab[data-k="waste"]{left:52% !important;top:66% !important;max-width:44%}
+  /* ⑧ 三个方位标注在窄屏会挤在文字框下方遮挡 3D，直接隐藏（文案已把信息说全） */
+  #s8-labels{display:none}
   /* 结尾输入框缩小 */
   #closeInput{width:88vw;height:52px;font-size:14px;padding:0 16px;top:57%}
   /* 来源说明 */
