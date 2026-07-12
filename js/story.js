@@ -1,4 +1,23 @@
-var PSCALE=innerWidth<640?1.8:1;
+var PSCALE=innerWidth<640?1.25:1;   // 原来手机端×1.8 是为补偿移动 GPU 丢弃小 point；改用 mesh 后不需要，只留一点点放大
+/* ★ 粒子渲染兼容层（2026-07-12）：Intel Arc + ANGLE/D3D11（用户机）不渲染 point sprite——
+   THREE.Points 在那台机器上整段不可见（用户三次报"⑦粒子没了"，本机 GPU/软渲染都复现不出；
+   实测 lost=false、pointSizeMax=1024，排除上下文丢失与尺寸钳制，只剩驱动不画点精灵）。
+   统一改用 InstancedMesh 小方块走普通三角形管线，任何显卡都画得出。
+   兼容原 API：pts.material.opacity 与 pts.material.size 照旧可写，位置仍从传入 geometry 的 position 读。 */
+function PTS(g,opt){
+  const n=g.attributes.position.count;
+  const mat=new THREE.MeshBasicMaterial({color:opt.color,transparent:true,opacity:0,depthWrite:false});
+  mat.size=opt.size;                                   // 世界单位，与原 PointsMaterial.size 同义
+  const m=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),mat,n);
+  m.frustumCulled=false;
+  const d=new THREE.Object3D();
+  m.onBeforeRender=function(){                         // 每帧从源 geometry 同步实例矩阵
+    const p=g.attributes.position.array, s=mat.size*0.32;   // 系数取 0.32：方块屏幕大小≈原点精灵（截图比对定的）
+    for(let i=0;i<n;i++){ d.position.set(p[i*3],p[i*3+1],p[i*3+2]); d.scale.setScalar(s); d.updateMatrix(); m.setMatrixAt(i,d.matrix); }
+    m.instanceMatrix.needsUpdate=true;
+  };
+  return m;
+}
 function fitFov(cam){if(cam.userData.bf===undefined)cam.userData.bf=cam.fov;var a=innerWidth/innerHeight,bf=cam.userData.bf;cam.fov=a<1?Math.min(86,bf*(1+(1/a-1)*0.6)):bf;cam.updateProjectionMatrix();}
 /* story.js — 「你问 AI 的那句话，要喝掉一口水」7 章引擎 + 科技绘图 + 芯片 Three.js
    范式：GSAP pin 分阶段时序（文字纯位移滑入定格→图渐现+动画→停留→划走→下一块），
@@ -401,7 +420,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const NF=300,fg=new THREE.BufferGeometry(),fp=new Float32Array(NF*3),ft=new Float32Array(NF),fsx=new Float32Array(NF),fsz=new Float32Array(NF);
   function seedFlow(i){ft[i]=Math.random();fsx[i]=-6+(Math.random()-.5)*N*sp*0.9;fsz[i]=(Math.random()-.5)*N*sp*0.9;}
   for(let i=0;i<NF;i++)seedFlow(i);fg.setAttribute('position',new THREE.BufferAttribute(fp,3));
-  const flow=new THREE.Points(fg,new THREE.PointsMaterial({color:0x9fe0ee,size:(.18)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(flow);
+  const flow=PTS(fg,{color:0x9fe0ee,size:(.18)*PSCALE});sc.add(flow);
 
   let P=0;ScrollTrigger.create({trigger:"#s1-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const bigV=document.getElementById('s1-drained');
@@ -484,7 +503,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const NS=620,sg=new THREE.BufferGeometry(),spos=new Float32Array(NS*3),sst=new Float32Array(NS),sox=new Float32Array(NS),soz=new Float32Array(NS);
   function seedSmoke(i){const m=mouths[Math.floor(Math.random()*3)];spos[i*3]=m.x+(Math.random()-.5)*0.3;spos[i*3+1]=m.y+Math.random()*0.4;spos[i*3+2]=m.z+(Math.random()-.5)*0.3;sst[i]=Math.random();sox[i]=(Math.random()-.5);soz[i]=(Math.random()-.5)*0.6;}
   for(let i=0;i<NS;i++)seedSmoke(i);sg.setAttribute('position',new THREE.BufferAttribute(spos,3));
-  const smoke=new THREE.Points(sg,new THREE.PointsMaterial({color:0xb08a6a,size:(.32)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(smoke);
+  const smoke=PTS(sg,{color:0xb08a6a,size:(.32)*PSCALE});sc.add(smoke);
 
   // 74 块立体农田（块6 换景：厂区沉下地平线，田块斜透视铺开；每格=1,000 公顷，停灌逐块变旱黄）
   const FN=74,fCols=10,fRows=Math.ceil(FN/fCols),farm=new THREE.Group();farm.position.set(0,0,3.4);farm.scale.setScalar(1.45);farm.rotation.y=0.55;sc.add(farm);   // 斜置≈1/3菱形感；tiles 以阵心为原点→旋转/缩放锁定视线中心
@@ -626,7 +645,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     const ox=new Float32Array(count), oy=new Float32Array(count), oz=new Float32Array(count);
     for(let i=0;i<count;i++){ t[i]=Math.random(); const a=Math.random()*6.283, r=Math.sqrt(Math.random())*rad; ox[i]=Math.cos(a)*r; oy[i]=Math.sin(a)*r*0.7; oz[i]=Math.sin(a)*r; }
     g.setAttribute('position',new THREE.BufferAttribute(pos,3));
-    const pts=new THREE.Points(g,new THREE.PointsMaterial({color:color,size:(size)*PSCALE,transparent:true,opacity:0,depthWrite:false})); sc.add(pts);
+    const pts=PTS(g,{color:color,size:(size)*PSCALE}); sc.add(pts);
     return {pts:pts,g:g,pos:pos,t:t,ox:ox,oy:oy,oz:oz,from:from,to:to,arc:arc,vapor:!!vapor};
   }
   const ptOf=(s,k)=>{const a=s.from,b=s.to; return [a.x+(b.x-a.x)*k, a.y+(b.y-a.y)*k+Math.sin(k*Math.PI)*s.arc, a.z+(b.z-a.z)*k];};
@@ -640,7 +659,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const NF=150, fg=new THREE.BufferGeometry(), fpos=new Float32Array(NF*3), fbx=new Float32Array(NF), fph=new Float32Array(NF);
   for(let i=0;i<NF;i++){ fbx[i]=-10+Math.random()*20; fpos[i*3]=fbx[i]; fpos[i*3+1]=6.4+Math.random()*2.2; fpos[i*3+2]=-4+Math.random()*4; fph[i]=Math.random()*6.283; }
   fg.setAttribute('position',new THREE.BufferAttribute(fpos,3));
-  const fogPts=new THREE.Points(fg,new THREE.PointsMaterial({color:COL.grey,size:(0.9)*PSCALE,transparent:true,opacity:0,depthWrite:false})); sc.add(fogPts);
+  const fogPts=PTS(fg,{color:COL.grey,size:(0.55)*PSCALE}); sc.add(fogPts);   // 换 mesh 后实体感强，比原点精灵调小免得像"灰砖"
 
   // 闭环：亮曲线 + 多箭头 + 流动粒子
   const loopCurve=new THREE.QuadraticBezierCurve3(new THREE.Vector3(2.4,7.2,-2),new THREE.Vector3(-8.4,9.0,0),new THREE.Vector3(-7,3.2,0));
@@ -654,7 +673,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   });
   const NL=46, lg=new THREE.BufferGeometry(), lpos=new Float32Array(NL*3), lt=new Float32Array(NL);
   for(let i=0;i<NL;i++)lt[i]=i/NL; lg.setAttribute('position',new THREE.BufferAttribute(lpos,3));
-  const loopPart=new THREE.Points(lg,new THREE.PointsMaterial({color:COL.leaf,size:(0.28)*PSCALE,transparent:true,opacity:0,depthWrite:false})); sc.add(loopPart);
+  const loopPart=PTS(lg,{color:COL.leaf,size:(0.28)*PSCALE}); sc.add(loopPart);
 
   const S={dc:0,water:0,power:0,split:0,carbon:0,loop:0};
   let P=0;
@@ -748,7 +767,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const NW=90, wg=new THREE.BufferGeometry(), wp=new Float32Array(NW*3), wt=new Float32Array(NW), wa=new Float32Array(NW);
   for(let i=0;i<NW;i++){wt[i]=Math.random(); wa[i]=Math.random()*6.283;}
   wg.setAttribute('position',new THREE.BufferAttribute(wp,3));
-  const splash=new THREE.Points(wg,new THREE.PointsMaterial({color:0xbfe4ef,size:(0.16)*PSCALE,transparent:true,opacity:0,depthWrite:false})); sc.add(splash);
+  const splash=PTS(wg,{color:0xbfe4ef,size:(0.16)*PSCALE}); sc.add(splash);
 
   // ===== 电的口径 · 电表(指针跳动)（居中，序列后半段）=====
   const mC=document.createElement('canvas'); mC.width=1240; mC.height=920; const mX=mC.getContext('2d');
@@ -841,17 +860,17 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   // 进水：水从侧上方注入塔顶（先有水进去）
   const NI=180,ig=new THREE.BufferGeometry(),ip=new Float32Array(NI*3),ist=new Float32Array(NI);
   for(let i=0;i<NI;i++)ist[i]=Math.random();ig.setAttribute('position',new THREE.BufferAttribute(ip,3));
-  const inflow=new THREE.Points(ig,new THREE.PointsMaterial({color:0x5fb6cf,size:(.2)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(inflow);
+  const inflow=PTS(ig,{color:0x5fb6cf,size:(.2)*PSCALE});sc.add(inflow);
   // 蒸汽（多，70-80%，从塔顶升腾）
   const NE=520,eg=new THREE.BufferGeometry(),ep=new Float32Array(NE*3),est=new Float32Array(NE);
   function seedEvap(i){const a=Math.random()*6.28,rr=Math.random()*1.0;ep[i*3]=Math.cos(a)*rr;ep[i*3+1]=topY+Math.random()*0.4;ep[i*3+2]=Math.sin(a)*rr;est[i]=Math.random();}
   for(let i=0;i<NE;i++)seedEvap(i);eg.setAttribute('position',new THREE.BufferAttribute(ep,3));
-  const evap=new THREE.Points(eg,new THREE.PointsMaterial({color:0xdce9ed,size:(.22)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(evap);
+  const evap=PTS(eg,{color:0xdce9ed,size:(.22)*PSCALE});sc.add(evap);
   // 废水（少，20-30%，从塔底沉出，暗红）
   const NW=150,wg=new THREE.BufferGeometry(),wp=new Float32Array(NW*3),wst=new Float32Array(NW);
   function seedWaste(i){const a=Math.random()*6.28,rr=1.3+Math.random()*0.5;wp[i*3]=Math.cos(a)*rr;wp[i*3+1]=-0.2;wp[i*3+2]=Math.sin(a)*rr;wst[i]=Math.random();}
   for(let i=0;i<NW;i++)seedWaste(i);wg.setAttribute('position',new THREE.BufferAttribute(wp,3));
-  const waste=new THREE.Points(wg,new THREE.PointsMaterial({color:0xc0432a,size:(.16)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(waste);
+  const waste=PTS(wg,{color:0xc0432a,size:(.16)*PSCALE});sc.add(waste);
   let P=0;ScrollTrigger.create({trigger:"#s3-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const cbs=[...stage.querySelectorAll('.cbox')];
   const vroot=document.getElementById('s3-track');
@@ -890,7 +909,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const ST=600,sg=new THREE.BufferGeometry(),spos=new Float32Array(ST*3),svel=new Float32Array(ST);
   for(let i=0;i<ST;i++){spos[i*3]=(Math.random()-.5)*N*sp;spos[i*3+1]=Math.random()*6;spos[i*3+2]=(Math.random()-.5)*N*sp;svel[i]=.01+Math.random()*.03;}
   sg.setAttribute('position',new THREE.BufferAttribute(spos,3));
-  const steam=new THREE.Points(sg,new THREE.PointsMaterial({color:0xcfe6ec,size:(.14)*PSCALE,transparent:true,opacity:0,depthWrite:false}));sc.add(steam);
+  const steam=PTS(sg,{color:0xcfe6ec,size:(.14)*PSCALE});sc.add(steam);
   let P=0;ScrollTrigger.create({trigger:"#chip-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const tempV=document.getElementById('chip-temp'),waterV=document.getElementById('chip-water');
   const cbs=[...document.querySelectorAll('#chip-stage .cbox')];
@@ -1073,7 +1092,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     const ox=new Float32Array(count), oy=new Float32Array(count), oz=new Float32Array(count);
     for(let i=0;i<count;i++){ t[i]=Math.random(); const a=Math.random()*6.283, r=Math.sqrt(Math.random())*rad; ox[i]=Math.cos(a)*r; oy[i]=Math.sin(a)*r*0.7; oz[i]=Math.sin(a)*r; }
     g.setAttribute('position',new THREE.BufferAttribute(pos,3));
-    const pts=new THREE.Points(g,new THREE.PointsMaterial({color:color,size:(size)*PSCALE,transparent:true,opacity:0,depthWrite:false})); sc.add(pts);
+    const pts=PTS(g,{color:color,size:(size)*PSCALE}); sc.add(pts);
     return {pts:pts,g:g,pos:pos,t:t,ox:ox,oy:oy,oz:oz,from:from,to:to,arc:arc,vapor:!!vapor};
   }
   const ptOf=(s,k)=>{const a=s.from,b=s.to; return [a.x+(b.x-a.x)*k, a.y+(b.y-a.y)*k+Math.sin(k*Math.PI)*s.arc, a.z+(b.z-a.z)*k];};
