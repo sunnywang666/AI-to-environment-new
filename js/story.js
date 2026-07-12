@@ -1,4 +1,5 @@
 var PSCALE=innerWidth<640?1.25:1;   // 原来手机端×1.8 是为补偿移动 GPU 丢弃小 point；改用 mesh 后不需要，只留一点点放大
+var PSCALE_PT=innerWidth<640?1.8:1; // 仍用 THREE.Points 的段（①取水、②芯片，用户要求保持原样）沿用旧补偿
 /* ★ 粒子渲染兼容层（2026-07-12）：Intel Arc + ANGLE/D3D11（用户机）不渲染 point sprite——
    THREE.Points 在那台机器上整段不可见（用户三次报"⑦粒子没了"，本机 GPU/软渲染都复现不出；
    实测 lost=false、pointSizeMax=1024，排除上下文丢失与尺寸钳制，只剩驱动不画点精灵）。
@@ -420,7 +421,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const NF=300,fg=new THREE.BufferGeometry(),fp=new Float32Array(NF*3),ft=new Float32Array(NF),fsx=new Float32Array(NF),fsz=new Float32Array(NF);
   function seedFlow(i){ft[i]=Math.random();fsx[i]=-6+(Math.random()-.5)*N*sp*0.9;fsz[i]=(Math.random()-.5)*N*sp*0.9;}
   for(let i=0;i<NF;i++)seedFlow(i);fg.setAttribute('position',new THREE.BufferAttribute(fp,3));
-  const flow=PTS(fg,{color:0x9fe0ee,size:(.18)*PSCALE});sc.add(flow);
+  const flow=new THREE.Points(fg,new THREE.PointsMaterial({color:0x9fe0ee,size:(.18)*PSCALE_PT,transparent:true,opacity:0,depthWrite:false}));sc.add(flow);   // 用户要求①保持原样（点精灵）
 
   let P=0;ScrollTrigger.create({trigger:"#s1-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const bigV=document.getElementById('s1-drained');
@@ -909,7 +910,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const ST=600,sg=new THREE.BufferGeometry(),spos=new Float32Array(ST*3),svel=new Float32Array(ST);
   for(let i=0;i<ST;i++){spos[i*3]=(Math.random()-.5)*N*sp;spos[i*3+1]=Math.random()*6;spos[i*3+2]=(Math.random()-.5)*N*sp;svel[i]=.01+Math.random()*.03;}
   sg.setAttribute('position',new THREE.BufferAttribute(spos,3));
-  const steam=PTS(sg,{color:0xcfe6ec,size:(.14)*PSCALE});sc.add(steam);
+  const steam=new THREE.Points(sg,new THREE.PointsMaterial({color:0xcfe6ec,size:(.14)*PSCALE_PT,transparent:true,opacity:0,depthWrite:false}));sc.add(steam);   // 用户要求②保持原样（点精灵）
   let P=0;ScrollTrigger.create({trigger:"#chip-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const tempV=document.getElementById('chip-temp'),waterV=document.getElementById('chip-water');
   const cbs=[...document.querySelectorAll('#chip-stage .cbox')];
