@@ -1083,10 +1083,17 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   const sSteam=stream(V(-7.6,2.4,0),V(-8.0,5.4,0.9),0.5,COL.water,90,innerWidth<640?0.12:0.22,0.42,true); // 机房散热（PUE 降→变淡；手机端 PSCALE 会放大，这里先缩）
 
   // WUE：机房上方悬着的一滴水——电有尺子了，水还没有
-  const drop=new THREE.Mesh(new THREE.SphereGeometry(0.5,26,20),new THREE.MeshStandardMaterial({color:0x3d7188,emissive:COL.water,emissiveIntensity:0.85,transparent:true,opacity:0,metalness:0.2,roughness:0.25}));
-  drop.position.set(-7.4,4.5,0.4); drop.scale.y=1.25; sc.add(drop);
-  const dEdge=new THREE.Mesh(new THREE.SphereGeometry(0.62,24,18),new THREE.MeshBasicMaterial({color:E_WATER,transparent:true,opacity:0,side:THREE.BackSide}));
-  dEdge.scale.y=1.25; drop.add(dEdge);   // 外发光壳（不是线框，避免"网球"感）
+  // 真·水滴轮廓（下半球 + 上收尖），LatheGeometry 旋转成形——不是球
+  function dropGeo(R,Htop,scale){
+    const prof=[];
+    for(let i=0;i<=14;i++){const u=Math.PI/2*i/14; prof.push(new THREE.Vector2(Math.sin(u)*R*scale,-Math.cos(u)*R*scale));}
+    for(let k=1;k<=16;k++){const t=k/16; prof.push(new THREE.Vector2(R*scale*Math.pow(1-t,1.45),Htop*scale*t));}
+    return new THREE.LatheGeometry(prof,30);
+  }
+  const drop=new THREE.Mesh(dropGeo(0.52,1.35,1),new THREE.MeshStandardMaterial({color:0x3d7188,emissive:COL.water,emissiveIntensity:0.85,transparent:true,opacity:0,metalness:0.2,roughness:0.25}));
+  drop.position.set(-7.4,4.4,0.4); sc.add(drop);
+  const dEdge=new THREE.Mesh(dropGeo(0.52,1.35,1.16),new THREE.MeshBasicMaterial({color:E_WATER,transparent:true,opacity:0,side:THREE.BackSide}));
+  drop.add(dEdge);   // 外发光壳（同轮廓放大，不是线框）
 
   const S={east:0,move:0,west:0,green:0,zw:0,pue:0,wue:0};
   let P=0,fr=0;
@@ -1143,7 +1150,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     sSteam.pts.material.opacity*= 0.5*(1-S.pue*0.62);
     // WUE：一滴水悬在机房上方，没有尺子量它
     const dp=S.wue; drop.material.opacity=dp*0.95; dEdge.material.opacity=dp*0.22;
-    drop.position.y=4.5+Math.sin(fr*0.02)*0.22; drop.material.emissiveIntensity=0.6+0.3*Math.sin(fr*0.05);
+    drop.position.y=4.4+Math.sin(fr*0.02)*0.22; drop.rotation.y+=0.004; drop.material.emissiveIntensity=0.6+0.3*Math.sin(fr*0.05);
     // 读数（唯一真值→触发式播到真值后定格，不随滚动来回）
     if(gV) gV.textContent=Math.round(sm(trigProg(trigG,S.green>0.35,2))*86);
     if(pV) pV.textContent=(1.54-sm(trigProg(trigP,S.pue>0.35,2))*0.08).toFixed(2);
