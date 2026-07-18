@@ -1,5 +1,7 @@
-# 你问 AI 的那句话，要喝掉一口水
-### The Body of the Cloud — a scrollytelling data story on AI's environmental cost
+# 算力之渴：一滴水里的 AI 能耗账本与中国绿色算力之路
+### The Thirst of Compute — a scrollytelling data story on AI's environmental cost
+
+> 开场引子：你问 AI 的那句话，要喝掉一口水。
 
 跟着一滴水走完它在 AI 数据中心里的一生：被抽走、扛热、蒸发，再看电表怎么转、账单寄给谁、碳排落在哪。8 段滚动长卷，全部图形手写渲染。
 
