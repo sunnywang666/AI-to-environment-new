@@ -794,7 +794,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
 
   // ===== 水的口径 · 玻璃量瓶（居中，序列前半段）=====
   const vx=0, vH=6.4, vR=1.5;
-  const glass=new THREE.Mesh(new THREE.CylinderGeometry(vR,vR,vH,30,1,true),new THREE.MeshStandardMaterial({color:0x2a3a44,emissive:0x18323c,emissiveIntensity:0.15,transparent:true,opacity:0.14,side:THREE.DoubleSide}));
+  const glass=new THREE.Mesh(new THREE.CylinderGeometry(vR,vR,vH,30,1,true),new THREE.MeshStandardMaterial({color:0x2a3a44,emissive:0x18323c,emissiveIntensity:0.15,transparent:true,opacity:0.14,side:THREE.DoubleSide,depthWrite:false}));
   glass.position.set(vx,vH/2,0); sc.add(glass); const gEdge=EDGE(glass,E_WATER,0.85);
   const rings=[]; [0.03,vH].forEach(yy=>{const r=new THREE.Mesh(new THREE.TorusGeometry(vR,0.05,8,36),new THREE.MeshBasicMaterial({color:E_WATER,transparent:true,opacity:0.7})); r.rotation.x=Math.PI/2; r.position.set(vx,yy,0); sc.add(r); rings.push(r);});
   const water=new THREE.Mesh(new THREE.CylinderGeometry(vR*0.93,vR*0.93,1,30),new THREE.MeshStandardMaterial({color:0x357088,emissive:COL.water,emissiveIntensity:0.7,transparent:true,opacity:0.95}));
