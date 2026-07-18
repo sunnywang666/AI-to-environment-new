@@ -2,6 +2,30 @@
 <html lang="zh"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>算力之渴：一滴水里的 AI 能耗账本与中国绿色算力之路</title>
+<script>
+// 切窗回来标签页被浏览器回收重载后，恢复滚动位置（site很重,休眠/省内存机制常回收）
+(function(){
+  try{
+    if('scrollRestoration' in history) history.scrollRestoration='manual';
+    var KEY='szk-scroll-y';
+    var q=new URLSearchParams(location.search);
+    var saved=q.has('dbgp')?NaN:parseInt(sessionStorage.getItem(KEY)||'',10);
+    var userScrolled=false, restoring=false;
+    addEventListener('scroll',function(){
+      if(!restoring) userScrolled=true;
+      clearTimeout(window.__szkT);
+      window.__szkT=setTimeout(function(){try{sessionStorage.setItem(KEY,String(scrollY));}catch(e){}},250);
+    },{passive:true});
+    function restore(){
+      if(userScrolled||isNaN(saved)||saved<50) return;
+      restoring=true;
+      scrollTo({top:saved,behavior:'instant'});
+      setTimeout(function(){restoring=false;},80);
+    }
+    addEventListener('load',function(){restore();setTimeout(restore,600);setTimeout(restore,1600);});
+  }catch(e){}
+})();
+</script>
 <meta name="description" content="一滴水的旅程：追踪 AI 数据中心的取水、耗电、排放与账单。滚动叙事数据新闻《云的身体》。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="算力之渴：一滴水里的 AI 能耗账本与中国绿色算力之路">
