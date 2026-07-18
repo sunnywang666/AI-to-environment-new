@@ -1,10 +1,10 @@
 ﻿<!doctype html>
 <html lang="zh"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>你问 AI 的那句话，要喝掉一口水</title>
+<title>算力之渴：一滴水里的 AI 能耗账本与中国绿色算力之路</title>
 <meta name="description" content="一滴水的旅程：追踪 AI 数据中心的取水、耗电、排放与账单。滚动叙事数据新闻《云的身体》。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="你问 AI 的那句话，要喝掉一口水">
+<meta property="og:title" content="算力之渴：一滴水里的 AI 能耗账本与中国绿色算力之路">
 <meta property="og:description" content="一滴水的旅程：追踪 AI 数据中心的取水、耗电、排放与账单。滚动叙事数据新闻。">
 <meta property="og:url" content="https://sunnywang666.github.io/AI-to-environment-new/story.html">
 <meta property="og:image" content="https://sunnywang666.github.io/AI-to-environment-new/docs/screenshots/hero-desktop.png">
@@ -23,7 +23,9 @@
   /* ---------- 开场 ---------- */
   .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:9vh 24px 6vh}
   .hero .eyebrow{font-size:13px;letter-spacing:.3em;color:var(--dim);font-weight:500;margin-bottom:26px}
-  .hero h1{font-size:clamp(34px,6vw,64px);font-weight:900;color:#fff;line-height:1.25;margin-bottom:22px}
+  .hero h1{font-size:clamp(40px,7vw,72px);font-weight:900;color:#fff;line-height:1.2;letter-spacing:.08em;margin-bottom:14px}
+.hero .subtitle{font-size:clamp(14px,1.6vw,17px);letter-spacing:.12em;color:#9fb0b8;margin-bottom:20px}
+.hero .hook{font-size:clamp(16px,1.9vw,20px);color:#cdd6da;font-weight:500;margin-bottom:18px}
   .chatbox{width:100%;max-width:600px;background:var(--ink);border:1px solid rgba(180,205,215,.14);border-radius:16px;padding:16px 18px 10px;text-align:left}
   .chatbox .ph{color:#5f6a70;font-size:18px}
   .chatbox .bar{display:flex;align-items:center;gap:10px;margin-top:12px}
@@ -63,7 +65,9 @@
 <section id="herow"><div id="hero-track"><div id="hero-stage">
   <div class="hero">
     <div class="eyebrow">数据新闻 · AI 的环境代价</div>
-    <h1>你问 AI 的那句话，<br>要喝掉一口水</h1>
+    <h1>算力之渴</h1>
+    <div class="subtitle">一滴水里的 AI 能耗账本与中国绿色算力之路</div>
+    <p class="hook">你问 AI 的那句话，要喝掉一口水。</p>
     <div class="chatwrap">
       <div class="chatbox">
         <input id="heroInput" type="text" maxlength="60" placeholder="问点什么…或点下面的预设提问" autocomplete="off">
@@ -102,6 +106,7 @@
 <section class="ctrans" data-n="1" data-k="① 取水" data-t="这瓶水从哪来"><canvas></canvas></section>
 <section id="s1w"><div id="s1-track"><div id="s1-stage">
   <canvas id="s1-canvas"></canvas>
+  <canvas id="s1-2d"></canvas>
   <div id="s1-hud"><div class="hud-num">
     <div class="v" id="s1-drained" style="color:var(--water)">0</div>
     <div class="u">亿升干净水已被抽走 · 谷歌 2023 年全年约 290 亿升，≈ 两个西湖，近八成是饮用水</div>
@@ -115,6 +120,7 @@
   #s1-track{height:440vh;position:relative}
   #s1-stage{position:sticky;top:0;height:100vh;overflow:hidden;background:#1a2632}
   #s1-canvas{position:absolute;inset:0}
+  #s1-2d{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
   #s1-hud{position:absolute;inset:0;pointer-events:none}
   #s1-hud .readout{position:absolute;left:34px;top:30px}
   #s1-hud .row{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
@@ -157,6 +163,7 @@
 <section class="ctrans" data-n="3" data-k="③ 用完之后" data-t="水分成两条路"><canvas></canvas></section>
 <section id="s3w"><div id="s3-track"><div id="s3-stage">
   <canvas id="s3-canvas"></canvas>
+  <canvas id="s3-2d"></canvas>
   <div id="s3-hud"><div class="hud-num">
     <div class="v" style="color:var(--water)">70–80%</div>
     <div class="u">在冷却塔蒸发升空、多在别处降雨；另 20–30% 成化学废水，回不去</div>
@@ -170,6 +177,7 @@
   #s3-track{height:460vh;position:relative}
   #s3-stage{position:sticky;top:0;height:100vh;overflow:hidden;background:#1a2632}
   #s3-canvas{position:absolute;inset:0}
+  #s3-2d{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
   #s3-hud{position:absolute;inset:0;pointer-events:none}
   #s3-hud .readout{position:absolute;left:34px;top:30px}
   #s3-hud .row{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
@@ -189,7 +197,7 @@
   <div class="box cbox"><p>AI 留下的不只是水。先说空气：给芯片供电和备电的常是燃气轮机和柴油机，燃烧时排二氧化氮和颗粒物。</p></div>
   <div class="box cbox"><p>xAI 孟菲斯数据中心一度架起 35 台燃气轮机；投运后紧邻厂区二氧化氮峰值上升约<span class="hl hl-e">79%</span>。亚马逊为 Anthropic 建的数据中心，一张许可证就列着<span class="hl hl-e">234 台</span>柴油发电机。</p></div>
   <div class="box cbox"><p>按当前趋势，到 2030 年美国数据中心空气污染每年将造成近<span class="hl hl-e">200 亿美元</span>公共健康损失、约 1300 人提前死亡。</p></div>
-  <div class="box cbox"><p>再说碳：同样发一度电，以水电为主的挪威约 25 克，以燃煤为主的波兰约<span class="hl hl-l">716 克</span>——相差近 28 倍。</p></div>
+  <div class="box cbox"><p>再说碳：同样发一度电，以水电为主的挪威约 25 克，以燃煤为主的波兰约<span class="hl hl-e">716 克</span>——相差近 28 倍。</p></div>
   <div class="box cbox"><p>用电增长抬高碳排：数据中心相关二氧化碳从 2024 年约 1.8 亿吨，预计到 2030 年增至约<span class="hl hl-l">4 亿吨</span>。</p></div>
   <div class="box cbox"><p>为供电，一些原定退役的燃煤电厂被要求继续待命：2025 年美国能源部下令保留<span class="hl hl-g">5 座</span>、合计 3240 兆瓦；宾州一座仅以约 0.5% 负荷运转，待命费用却由当地居民电费分摊。</p></div>
   <div class="box cbox"><p>再往上游，制造芯片同样耗水：2021 年台湾大旱，当局让约<span class="hl hl-w">7.4 万公顷</span>农田停灌、把水优先供给工厂，台积电一度靠水罐车运水维持生产。</p></div>
@@ -323,13 +331,21 @@
 <section class="endnote">
   <div class="kicker">数据来源与方法说明</div>
   <p class="src"><a href="https://www.iea.org/reports/energy-and-ai" target="_blank" rel="noopener">IEA《Energy and AI》(2025)</a> · <a href="https://unu.edu/inweh/news/environmental-cost-of-AIs-Enrgy-use-carbon-water-and-land-footprints" target="_blank" rel="noopener">UNU-INWEH (2026)</a> · <a href="https://arxiv.org/abs/2304.03271" target="_blank" rel="noopener">UC Riverside CACM (2025)</a> · <a href="https://eta-publications.lbl.gov/sites/default/files/2024-12/lbnl-2024-united-states-data-center-energy-usage-report.pdf" target="_blank" rel="noopener">LBNL (2024)</a> · <a href="https://arxiv.org/abs/2412.06288v1" target="_blank" rel="noopener">《The Unpaid Toll》(2024)</a> · <a href="https://www.pbs.org/newshour/nation/why-is-this-so-high-electric-bills-in-west-virginia-now-top-mortgages-despite-trumps-promises" target="_blank" rel="noopener">PBS/AP (2026)</a> · <a href="https://ourworldindata.org/energy" target="_blank" rel="noopener">Ember/OWID (2026)</a> · <a href="https://www.eia.gov/electricity/" target="_blank" rel="noopener">EIA</a> · <a href="https://www.selc.org/press-release/groups-appeal-permit-for-xais-south-memphis-data-center-decisions-around-unpermitted-methane-gas-turbines/" target="_blank" rel="noopener">SELC/田纳西大学 (2025)</a> · <a href="https://gridstrategiesllc.com/wp-content/uploads/National-Load-Growth-Report-2024.pdf" target="_blank" rel="noopener">Grid Strategies (2024)</a> · Reuters (2021) · <a href="https://www.ipcc.ch/assessment-report/ar6/" target="_blank" rel="noopener">IPCC AR6</a> · <a href="https://www.ndrc.gov.cn/xxgk/jd/jd/202202/t20220217_1315795.html" target="_blank" rel="noopener">国家发改委等四部门「东数西算」启动 (2022)</a> · <a href="https://www.gov.cn/lianbo/bumen/202408/content_6971147.htm" target="_blank" rel="noopener">国家数据局：八大枢纽机架规模与 PUE (2024)</a> · <a href="https://www.ndrc.gov.cn/xwdt/tzgg/202112/t20211208_1307105.html" target="_blank" rel="noopener">《推动数据中心和 5G 等新型基础设施绿色高质量发展实施方案》(2021, PUE 1.3/1.25)</a> · <a href="https://www.stdaily.com/web/gdxw/2025-10/27/content_421569.html" target="_blank" rel="noopener">中国信通院《中国绿色算力发展研究报告》(2024 平均 PUE 1.46)</a> · <a href="https://www.news.cn/liangzi/20251224/715fa9621902447e8a1a5c9742c76863/c.html" target="_blank" rel="noopener">新华网：和林格尔集群绿电占比 86% (2025)</a> · <a href="https://www.nda.gov.cn/sjj/ywpd/szkjyjcss/1222/20240926133451065388117_pc.html" target="_blank" rel="noopener">国家数据局：庆阳集群绿电与 PUE/WUE 案例 (2024)</a> · <a href="https://www.news.cn/digital/20260506/957be30d7eab439db130aa8d3c6400ee/c.html" target="_blank" rel="noopener">新华网：中卫「算电协同」绿电直供 (2026)</a> · <a href="https://std.samr.gov.cn/gb/search/gbDetailedCNF?id=CAC4327430CB595EE05397BE0A0A0A38" target="_blank" rel="noopener">国家标准计划 20230195-T-469《数据中心 水资源使用效率》(制定中)</a>。部分数字在不同来源间存在口径差异，是测量方法与统计边界不同所致，正文已标注核心差异。</p>
+  <p class="src" style="margin-top:18px"><span style="letter-spacing:.2em;color:var(--dim)">方法与工具</span><br>
+  报道为八幕原创滚动叙事：数据均取自上列权威公开来源并逐条核对原文；对同一指标的口径分歧（如单次查询耗水 0.32 毫升与 519 毫升）不取舍、并置呈现并解释成因。可视化基于 Three.js/WebGL 与 Canvas 原生绘制（芯片散热、冷却水回路、废水分流、系统闭环等三维场景），纯前端实现、多端自适应；首屏能耗估算器的系数来自 Epoch AI 与 UC Riverside 的公开测算。创作坚持人工主导、AI 辅助：AI 仅用于代码与素材辅助，选题、数据核验与结论均由团队完成。</p>
+  <!-- 署名（提交前填写）：
+  <p class="src" style="margin-top:18px"><span style="letter-spacing:.2em;color:var(--dim)">制作团队</span><br>
+  作者：___ · 指导老师：___ · ___（学校/院系）</p>
+  -->
 </section>
 
 <style>
 /* ===== 移动端适配（仅 ≤640px 生效，不影响桌面） ===== */
 @media (max-width:640px){
   html,body{font-size:16px}
-  .hero h1{font-size:clamp(25px,7.5vw,38px);margin-bottom:26px}
+  .hero h1{font-size:clamp(32px,10vw,42px);margin-bottom:10px}
+  .hero .subtitle{font-size:13px;letter-spacing:.06em;margin-bottom:16px}
+  .hero .hook{font-size:15.5px;margin-bottom:14px}
   .chatbox{max-width:none}
   .chatbox input{font-size:16px}
   .thread{height:236px}
@@ -366,5 +382,5 @@
 <script src="js/vendor/gsap.min.js"></script>
 <script src="js/vendor/ScrollTrigger.min.js"></script>
 <script src="js/vendor/three.min.js"></script>
-<script src="js/story.js?v=11"></script>
+<script src="js/story.js?v=12"></script>
 </body></html>

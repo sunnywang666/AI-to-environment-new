@@ -137,10 +137,11 @@ function bars(data,hlNames,color){return (ctx,p,prog,alpha,dy)=>layer(ctx,alpha,
   ctx.strokeStyle=C.grid;ctx.lineWidth=1;
   for(let k=0;k<=4;k++){const yy=lerp(p.b,p.t,k/4);ctx.beginPath();ctx.moveTo(p.l,yy);ctx.lineTo(p.r,yy);ctx.stroke();}
   data.forEach((d,i)=>{const cx=p.l+(i+0.5)/n*(p.r-p.l), h=(p.b-yOf(d.v))*prog, hit=hlNames.includes(d.n);
-    if(hit){ctx.shadowColor=color;ctx.shadowBlur=14;ctx.fillStyle=color;}else{ctx.shadowBlur=0;ctx.fillStyle="rgba(200,215,225,.16)";}
+    const col=(typeof color==="object")?color[d.n]:color;   // 支持逐名配色：清洁电网绿 / 燃煤电网红
+    if(hit){ctx.shadowColor=col;ctx.shadowBlur=14;ctx.fillStyle=col;}else{ctx.shadowBlur=0;ctx.fillStyle="rgba(200,215,225,.16)";}
     ctx.fillRect(cx-bw/2,p.b-h,bw,h);ctx.shadowBlur=0;
     ctx.fillStyle=C.dim;ctx.font=FNT(14);ctx.textAlign="center";ctx.textBaseline="top";ctx.fillText(d.n,cx,p.b+8);
-    ctx.fillStyle=hit?color:C.dim;ctx.font=FNT(14,700);ctx.textBaseline="alphabetic";ctx.fillText(Math.round(d.v*prog),cx,p.b-h-8);});
+    ctx.fillStyle=hit?col:C.dim;ctx.font=FNT(14,700);ctx.textBaseline="alphabetic";ctx.fillText(Math.round(d.v*prog),cx,p.b-h-8);});
 });}
 
 // 降水对比（宁夏 vs 全国，水青发光）
@@ -423,6 +424,39 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   for(let i=0;i<NF;i++)seedFlow(i);fg.setAttribute('position',new THREE.BufferAttribute(fp,3));
   const flow=new THREE.Points(fg,new THREE.PointsMaterial({color:0x9fe0ee,size:(.18)*PSCALE_PT,transparent:true,opacity:0,depthWrite:false}));sc.add(flow);   // 用户要求①保持原样（点精灵）
 
+  // ===== 2D 覆盖层：水源溯源标注 + 宁夏/全国年降水对比（200/630 是唯一真值→触发式动画） =====
+  const cv2=document.getElementById('s1-2d'),x2=cv2?cv2.getContext('2d'):null;
+  function rz2(){if(!cv2)return;const d=Math.min(devicePixelRatio||1,2);cv2.width=W()*d;cv2.height=H()*d;x2.setTransform(d,0,0,d,0,0);}
+  rz2();
+  const trigRain={p:0};
+  function draw2d(P){if(!x2)return;x2.clearRect(0,0,W(),H());const mob=innerWidth<640;
+    // 溯源标注：这片方阵是河流/地下水，随抽干淡出
+    const srcA=sm(cl((P-0.03)/0.08))*(1-sm(cl((P-0.55)/0.15)));
+    if(srcA>0.01){x2.globalAlpha=srcA;x2.fillStyle="#8fb9c6";x2.font=FNT(mob?12.5:14);
+      x2.textAlign="left";x2.textBaseline="top";
+      x2.fillText("水源 · 本地河流与地下水",mob?18:W()*0.14,mob?H()*0.31:H()*0.15);x2.globalAlpha=1;}
+    // 降水对比：随中卫段淡入；柱高与读数由触发动画播到真值后定格
+    const gA=sm(cl((P-0.78)/0.05));
+    if(gA>0.01){const pr=sm(trigProg(trigRain,gA>0.5,1.6));
+      const gx0=mob?W()*0.08:W()*0.62,gx1=mob?W()*0.72:W()*0.90,
+            gy0=mob?H()*0.42:H()*0.68,gy1=mob?H()*0.63:H()*0.88;   // 桌面：右下空地，避开机房楼/蓄水塔/文字框/HUD
+      const items=[{n:"宁夏中卫",v:200,hl:1},{n:"全国平均",v:630}],max=700,bw=Math.min(86,(gx1-gx0)*0.26);
+      x2.globalAlpha=gA;
+      x2.fillStyle="#8fb9c6";x2.font=FNT(mob?12.5:14);x2.textAlign="left";x2.textBaseline="alphabetic";
+      x2.fillText("年降水量（毫米）",gx0,gy0-14);
+      x2.strokeStyle="rgba(150,200,215,.3)";x2.lineWidth=1;
+      x2.beginPath();x2.moveTo(gx0,gy1);x2.lineTo(gx1,gy1);x2.stroke();
+      items.forEach((d,i)=>{const cx=gx0+(i+0.5)/2*(gx1-gx0),h=(gy1-gy0)*(d.v/max)*pr;
+        if(d.hl){x2.shadowColor=C.water;x2.shadowBlur=16;x2.fillStyle=C.water;}
+        else{x2.shadowBlur=0;x2.fillStyle="rgba(200,215,225,.18)";}
+        x2.fillRect(cx-bw/2,gy1-h,bw,h);x2.shadowBlur=0;
+        x2.fillStyle=C.dim;x2.font=FNT(mob?12:14);x2.textAlign="center";x2.textBaseline="top";
+        x2.fillText(d.n,cx,gy1+8);
+        x2.fillStyle=d.hl?C.water:C.dim;x2.font=FNT(mob?15:19,900);x2.textBaseline="alphabetic";
+        x2.fillText(Math.round(d.v*pr)+" mm",cx,gy1-h-10);});
+      x2.globalAlpha=1;}
+  }
+
   let P=0;ScrollTrigger.create({trigger:"#s1-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const bigV=document.getElementById('s1-drained');
   const cbs=[...stage.querySelectorAll('.cbox')];
@@ -457,9 +491,10 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     cam.position.set(Math.sin(0.32)*r,hgt,Math.cos(0.32)*r);cam.lookAt(-1.2,2.2,0.6);
     field.rotation.y=Math.sin(P*0.5)*0.02;
     bigV.textContent=Math.round(drained);
+    draw2d(P);
     slideBoxes(cbs,P);rdr.render(sc,cam);}
   animate();
-  addEventListener('resize',()=>{cam.aspect=W()/H();fitFov(cam);rdr.setSize(W(),H());});
+  addEventListener('resize',()=>{cam.aspect=W()/H();fitFov(cam);rdr.setSize(W(),H());rz2();});
 })();
 
 /* ---------- ④ 不只是水：3D 冒烟电厂为持续舞台（厂房+3 烟囱+234 台柴油机阵列+棕烟越冒越浓），
@@ -520,7 +555,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   let DPR=Math.min(devicePixelRatio||1,2),CW=0,CH=0;
   function rz2(){CW=innerWidth;CH=innerHeight;cv2.width=CW*DPR;cv2.height=CH*DPR;x2.setTransform(DPR,0,0,DPR,0,0);}
   rz2();addEventListener('resize',rz2);
-  const drawBars=bars([{n:"挪威",v:25},{n:"法国",v:40},{n:"德国",v:336},{n:"美国",v:386},{n:"中国",v:555},{n:"印度",v:705},{n:"波兰",v:716}],["挪威","波兰"],C.leaf);
+  const drawBars=bars([{n:"挪威",v:25},{n:"法国",v:40},{n:"德国",v:336},{n:"美国",v:386},{n:"中国",v:555},{n:"印度",v:705},{n:"波兰",v:716}],["挪威","波兰"],{"挪威":C.leaf,"波兰":C.ember});
   const drawTrend=trend([[2024,1.8],[2027,2.8],[2030,4.0]],[0,4.5],C.leaf,"4 亿吨","数据中心相关碳排：2024 实测 → 2030 预测（亿吨二氧化碳，虚线为 IEA 预测值）",true);
   const drawStandby=standby();
 
@@ -875,6 +910,27 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
   let P=0;ScrollTrigger.create({trigger:"#s3-track",start:"top top",end:"bottom bottom",scrub:true,onUpdate:s=>P=s.progress});
   const cbs=[...stage.querySelectorAll('.cbox')];
   const vroot=document.getElementById('s3-track');
+  // ===== 2D 覆盖层：两股去向的比例标注（线宽 ∝ 真实占比 ≈75:25） =====
+  const cv2=document.getElementById('s3-2d'),x2=cv2?cv2.getContext('2d'):null;
+  function rz2(){if(!cv2)return;const d=Math.min(devicePixelRatio||1,2);cv2.width=W()*d;cv2.height=H()*d;x2.setTransform(d,0,0,d,0,0);}
+  rz2();
+  function drawLabels(evapOn,wasteOn){if(!x2)return;x2.clearRect(0,0,W(),H());const mob=innerWidth<640;
+    const fs=mob?12:14;x2.textAlign="left";x2.textBaseline="middle";x2.lineCap="round";
+    if(evapOn>0.01){const lx=mob?W()*0.56:W()*0.68,ly=mob?H()*0.38:H()*0.42;
+      x2.globalAlpha=evapOn;
+      x2.strokeStyle=C.water;x2.shadowColor=C.water;x2.shadowBlur=10;x2.lineWidth=mob?7:9;
+      x2.beginPath();x2.moveTo(lx,ly);x2.lineTo(lx+(mob?34:48),ly);x2.stroke();x2.shadowBlur=0;
+      x2.fillStyle="#bfe2ec";x2.font=FNT(fs,700);x2.fillText("蒸发 70–80%",lx+(mob?42:58),ly);
+      x2.fillStyle=C.dim;x2.font=FNT(fs-1.5);x2.fillText("升空成水汽，多在别处降雨",lx,ly+(mob?18:22));
+      x2.globalAlpha=1;}
+    if(wasteOn>0.01){const lx=mob?W()*0.54:W()*0.64,ly=mob?H()*0.70:H()*0.74;
+      x2.globalAlpha=wasteOn;
+      x2.strokeStyle=C.ember;x2.shadowColor=C.ember;x2.shadowBlur=10;x2.lineWidth=mob?3:3.5;
+      x2.beginPath();x2.moveTo(lx,ly);x2.lineTo(lx+(mob?12:16),ly);x2.stroke();x2.shadowBlur=0;
+      x2.fillStyle="#eba895";x2.font=FNT(fs,700);x2.fillText("化学废水 20–30%",lx+(mob?20:26),ly);
+      x2.fillStyle=C.dim;x2.font=FNT(fs-1.5);x2.fillText("含盐与药剂，从塔底排出",lx,ly+(mob?18:22));
+      x2.globalAlpha=1;}
+  }
   function animate(){requestAnimationFrame(animate);
     if(!vis(vroot,300))return;
     tower.rotation.y+=0.0014;towerEdge.rotation.y=tower.rotation.y;rings.rotation.y=tower.rotation.y;
@@ -882,6 +938,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     const inOn=sm(cl((P-0.02)/0.16))*(1-sm(cl((P-0.46)/0.2)));   // 先：水注入
     const evapOn=sm(cl((P-0.2)/0.3));                             // 再：蒸发
     const wasteOn=sm(cl((P-0.55)/0.3));                           // 再：废水
+    drawLabels(evapOn,wasteOn);
     inflow.material.opacity=inOn*0.95;evap.material.opacity=evapOn*0.55;waste.material.opacity=wasteOn*0.85;
     for(let i=0;i<NI;i++){ist[i]+=0.013;if(ist[i]>1)ist[i]=0;const t=ist[i];
       ip[i*3]=lerp(-6.5,0,t)+(Math.random()-.5)*0.12;ip[i*3+1]=lerp(5.8,topY,t)-Math.sin(t*Math.PI)*0.5;ip[i*3+2]=(Math.random()-.5)*0.3;}
@@ -893,7 +950,7 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
     wg.attributes.position.needsUpdate=true;
     slideBoxes(cbs,P);rdr.render(sc,cam);}
   animate();
-  addEventListener('resize',()=>{cam.aspect=W()/H();fitFov(cam);rdr.setSize(W(),H());});
+  addEventListener('resize',()=>{cam.aspect=W()/H();fitFov(cam);rdr.setSize(W(),H());rz2();});
 })();
 
 /* ---------- ② 芯片 Three.js（原 viz-chip-heat，原样保留） ---------- */
