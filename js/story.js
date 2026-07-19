@@ -1085,8 +1085,8 @@ document.querySelectorAll('.ctrans').forEach(sec=>{
       if(rp>0&&rp<1){ rings(cx,waterY,rp,maxDim*(0.30+sf*0.16),0.30+sf*0.20,1); }
     }
 
-    // —— 真输入框：定格态浮现、可交互 ——
-    if(input){ if(settle>0.6) input.classList.add('on'); else input.classList.remove('on'); }
+    // —— 真输入框：最后一框（框45）到位才浮现，定格态可交互 ——
+    if(input){ if(settle>0.6 && P>0.7) input.classList.add('on'); else input.classList.remove('on'); }
 
     slideBoxes(cbs,P);
   }
