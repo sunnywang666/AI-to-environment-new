@@ -5,11 +5,5 @@ _verify/
 .DS_Store
 Thumbs.db
 
-# 海报设计源文件/大图（体积大，非网站恢复所需；如需可单独保存或用 Git LFS）
-*.ai
-*.pdf
-poster/export/
-poster/*.jpg
-
 # 用户真机反馈截图(本地参考,不入库)
 修复移动端/

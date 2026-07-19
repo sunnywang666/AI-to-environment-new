@@ -34,11 +34,11 @@ All figures are cited in the endnote of the story; discrepancies between sources
 ## 结构 / Structure
 
 ```
-story.html      正文（唯一入口，index.html 自动跳转；样式全部内联）
-js/story.js     渲染引擎与全部场景
-data/           地理底图（海报用）
-drafts/         开发过程中的单图原型（非成品）
-poster/         同题 80x200cm 海报的生产文件
+story.html              正文（唯一入口，index.html 自动跳转；样式全部内联）
+js/story.js             渲染引擎与全部场景
+js/vendor/              gsap、ScrollTrigger、three（story 实际引用的库）
+assets/fonts/           Noto Sans SC 自托管子集（国内可稳加载）
+docs/screenshots/       README 与 og:image 首屏截图
 ```
 
 深圳大学传播学院《数据新闻与可视化》课程大作业 · 2026
